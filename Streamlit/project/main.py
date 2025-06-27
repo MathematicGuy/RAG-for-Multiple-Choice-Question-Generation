@@ -14,7 +14,7 @@ interest_rate = col2.number_input("Interest Rate (in %)", min_value=0.1, max_val
 loan_term = col2.number_input("Loan Term", min_value=1, max_value=30)
 
 loan_amount = home_value - deposit
-monthly_interest_rate = (interest_rate / 100) / 12
+monthly_interest_rate = (interest_rate/100)/12
 number_of_payments = loan_term * 12
 monthly_payment = (
     loan_amount
@@ -30,7 +30,7 @@ total_interest = total_payments - loan_amount
 # create 3 columns
 col1, col2, col3 = st.columns(3, gap="small", vertical_alignment="top")
 # for each column add .metric with label (monthly, total_payments, interest)
-col1.metric(label="Monthly Interest Rate", value=f'${monthly_interest_rate:,.2f}')
+col1.metric(label="Monthly Interest Rate", value=f'${monthly_interest_rate:.10f}')
 col2.metric(label="Total Payment", value=f'${total_payments:,.0f}')
 col3.metric(label="Total Interest Rate", value=f'${total_interest:,.0f}')
 
