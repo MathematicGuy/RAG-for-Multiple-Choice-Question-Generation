@@ -56,6 +56,7 @@ nf4_config = BitsAndBytesConfig(
     bnb_4bit_compute_dtype=torch.bfloat16
 )
 
+#? Read huggingface token in token.txt file. Please paste your huggingface token in token.txt
 @st.cache_resource
 def get_hg_token():
     with open('token.txt', 'r') as f:
@@ -117,16 +118,16 @@ def process_pdf(uploaded_file):
     parser = StrOutputParser()
 
     # prompt = PromptTemplate.from_template("""
-    #     Trả lời ngắn gọn, rõ ràng bằng tiếng việt và chỉ dựa trên thông tin có sẵn bên dưới.
-    #     Nếu không tìm thấy thông tin, hãy nói rõ là không có dữ liệu liên quan.
+        # Trả lời ngắn gọn, rõ ràng bằng tiếng việt và chỉ dựa trên thông tin có sẵn bên dưới.
+        # Nếu không tìm thấy thông tin, hãy nói rõ là không có dữ liệu liên quan.
 
-    #     Nội dung tài liệu:
-    #     {context}
+        # Nội dung tài liệu:
+        # {context}
 
-    #     Câu hỏi:
-    #     {question}
+        # Câu hỏi:
+        # {question}
 
-    #     Trả lời:
+        # Trả lời:
     # """)
 
 

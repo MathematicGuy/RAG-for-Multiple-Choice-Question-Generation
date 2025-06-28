@@ -1,7 +1,7 @@
 PWD d:\CMC_UNI\Final Year\Graduation_Project\RAG-for-Multiple-Choice-Question-Generation\Streamlit\streamlit_latex
-INPUT d:\CMC_UNI\Final Year\Graduation_Project\RAG-for-Multiple-Choice-Question-Generation\Streamlit\streamlit_latex\streamlit.tex
-OUTPUT streamlit.log
-OUTPUT streamlit.log
+INPUT d:\CMC_UNI\Final Year\Graduation_Project\RAG-for-Multiple-Choice-Question-Generation\Streamlit\streamlit_latex\Week4_Buoi_T4.tex
+OUTPUT Week4_Buoi_T4.log
+OUTPUT Week4_Buoi_T4.log
 INPUT C:\Users\boboi\AppData\Local\Programs\MiKTeX\tex\latex\latexconfig\lualatexquotejobname.lua
 INPUT C:\Users\boboi\AppData\Local\Programs\MiKTeX\tex\latex\base\ltluatex.lua
 INPUT C:\Users\boboi\AppData\Local\Programs\MiKTeX\tex\luatex\luaotfload\luaotfload-main.lua
@@ -413,10 +413,10 @@ INPUT C:\Users\boboi\AppData\Local\Programs\MiKTeX\tex\latex\caption\caption3.st
 INPUT C:\Users\boboi\AppData\Local\Programs\MiKTeX\tex\latex\caption\caption3.sty
 INPUT C:\Users\boboi\AppData\Local\Programs\MiKTeX\tex\latex\framed\framed.sty
 INPUT C:\Users\boboi\AppData\Local\Programs\MiKTeX\tex\latex\framed\framed.sty
-INPUT .\streamlit.aux
-INPUT .\streamlit.aux
-OUTPUT streamlit.aux
-OUTPUT streamlit.aux
+INPUT .\Week4_Buoi_T4.aux
+INPUT .\Week4_Buoi_T4.aux
+OUTPUT Week4_Buoi_T4.aux
+OUTPUT Week4_Buoi_T4.aux
 INPUT C:\Users\boboi\AppData\Local\Programs\MiKTeX\tex\latex\base\ts1cmr.fd
 INPUT C:\Users\boboi\AppData\Local\Programs\MiKTeX\tex\latex\base\ts1cmr.fd
 INPUT C:\Users\boboi\AppData\Local\Programs\MiKTeX\tex\context\base\mkii\supp-pdf.mkii
@@ -425,20 +425,20 @@ INPUT C:\Users\boboi\AppData\Local\Programs\MiKTeX\tex\latex\epstopdf-pkg\epstop
 INPUT C:\Users\boboi\AppData\Local\Programs\MiKTeX\tex\latex\epstopdf-pkg\epstopdf-base.sty
 INPUT C:\Users\boboi\AppData\Local\Programs\MiKTeX\tex\latex\00miktex\epstopdf-sys.cfg
 INPUT C:\Users\boboi\AppData\Local\Programs\MiKTeX\tex\latex\00miktex\epstopdf-sys.cfg
-INPUT .\streamlit.out
-INPUT .\streamlit.out
-INPUT .\streamlit.out
-INPUT .\streamlit.out
-OUTPUT streamlit.pdf
-OUTPUT streamlit.pdf
-INPUT .\streamlit.out
-OUTPUT streamlit.out
-OUTPUT streamlit.out
+INPUT .\Week4_Buoi_T4.out
+INPUT .\Week4_Buoi_T4.out
+INPUT .\Week4_Buoi_T4.out
+INPUT .\Week4_Buoi_T4.out
+OUTPUT Week4_Buoi_T4.pdf
+OUTPUT Week4_Buoi_T4.pdf
+INPUT .\Week4_Buoi_T4.out
+OUTPUT Week4_Buoi_T4.out
+OUTPUT Week4_Buoi_T4.out
 INPUT C:\Users\boboi\AppData\Local\MiKTeX\fonts\map\pdftex\pdftex.map
-INPUT .\streamlit.toc
-INPUT .\streamlit.toc
-OUTPUT streamlit.toc
-OUTPUT streamlit.toc
-INPUT .\streamlit.aux
-INPUT .\streamlit.aux
-INPUT .\streamlit.out
+INPUT .\Week4_Buoi_T4.toc
+INPUT .\Week4_Buoi_T4.toc
+OUTPUT Week4_Buoi_T4.toc
+OUTPUT Week4_Buoi_T4.toc
+INPUT .\Week4_Buoi_T4.aux
+INPUT .\Week4_Buoi_T4.aux
+INPUT .\Week4_Buoi_T4.out

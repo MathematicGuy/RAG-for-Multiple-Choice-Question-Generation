@@ -171,52 +171,22 @@ Hệ thống bao gồm các thành phần chính sau:
     \caption{Kiến trúc tổng quan của hệ thống RAG}
 \end{figure}
 
-\begin{lstlisting}[language=Python]
-embeddings = HuggingFaceEmbeddings(
-    model_name='bkai-foundation-models/vietnamese-bi-encoder')
-
-model = AutoModelForCausalLM.from_pretrained("lmsys/vicuna-7b-v1.5", ...)
-tokenizer = AutoTokenizer.from_pretrained("lmsys/vicuna-7b-v1.5")
-pipeline = pipeline('text-generation', model=model, tokenizer=tokenizer)
-\end{lstlisting}
-
-\begin{lstlisting}[language=Python]
-	embeddings = HuggingFaceEmbeddings(model_name='bkai-foundation-models/vietnamese-bi-encoder')
-	loader = PyPDFLoader(tmp_file_path)
-	documents = loader.load()
-
-	splitter = SemanticChunker(embeddings=embeddings, ...)
-	docs = splitter.split_documents(documents)
-\end{lstlisting}
-
-
-\begin{verbatim}
-	loader = PyPDFLoader(tmp_file_path)
-	vector_db = Chroma.from_documents(docs, embedding=embeddings)
-	retriever = vector_db.as_retriever()
-\end{verbatim}
 
 \subsection*{3. Truy hồi văn bản liên quan}
-\begin{verbatim}
-st.set_page_config(page_title="PDF RAG Assistant")
-uploaded_file = st.file_uploader("Tải PDF")
-question = st.text_input("Đặt câu hỏi:")
-\end{verbatim}
+
+\end{lstlisting}
 
 \subsection*{4. Giao diện Streamlit}
 
-\begin{verbatim}
-st.set_page_config(page_title="PDF RAG Assistant")
-uploaded_file = st.file_uploader("Tải PDF")
-question = st.text_input("Đặt câu hỏi:")
-\end{verbatim}
 
-\section{Prompting}
 
-\subsection*{Mục tiêu prompt}
-Prompt được thiết kế để đảm bảo mô hình trả về kết quả như mong đợi:
+\section{Cải Tiến}
+\subsection*{Prompting}
+Mục Tiêu Prompt: Prompt được thiết kế để đảm bảo mô hình trả về kết quả như mong đợi:
 
 \subsection*{Prompt Thông Thường}
+
+
 
 \subsection*{Prompt có chỉ dẫn, ví dụ}
 \begin{verbatim}
@@ -250,7 +220,6 @@ Output:
     * Khai thác thiết bị vật lý: Người tấn công có thể trích xuất dữ liệu từ bộ nhớ flash, trích xuất firmware, chiếm quyền shell root hoặc thậm chí cài đặt firmware có chứa mã độc. \\
     * Tấn công side-channel: Người tấn công có thể chiết xuất khóa bí mật dùng để mã hóa/giải mã hoặc trộm cắp dữ liệu nhạy cảm bên trong. \\
     * Chỉnh sửa firmware: Người tấn công có thể lợi dụng việc thiếu cơ chế xác thực chặt chẽ trong quá trình cập nhật firmware qua OTA. \\
-
 \end{verbatim}
 
 \end{document}

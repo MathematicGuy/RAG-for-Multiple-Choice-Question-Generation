@@ -1,5 +1,5 @@
-PWD d:\CMC_UNI\Final Year\Graduation_Project\RAG-for-Multiple-Choice-Question-Generation\latex_note
-INPUT d:\CMC_UNI\Final Year\Graduation_Project\RAG-for-Multiple-Choice-Question-Generation\latex_note\rag_system.tex
+PWD d:\CMC_UNI\Final Year\Graduation_Project\RAG-for-Multiple-Choice-Question-Generation\RAG\rag_latex
+INPUT d:\CMC_UNI\Final Year\Graduation_Project\RAG-for-Multiple-Choice-Question-Generation\RAG\rag_latex\rag_system.tex
 OUTPUT rag_system.log
 OUTPUT rag_system.log
 INPUT C:\Users\boboi\AppData\Local\Programs\MiKTeX\tex\latex\latexconfig\lualatexquotejobname.lua
@@ -443,8 +443,6 @@ INPUT .\architecture.png
 INPUT .\architecture.png
 INPUT .\architecture.png
 INPUT .\architecture.png
-INPUT C:\Users\boboi\AppData\Local\Programs\MiKTeX\tex\latex\listings\lstlang1.sty
-INPUT C:\Users\boboi\AppData\Local\Programs\MiKTeX\tex\latex\listings\lstlang1.sty
 INPUT .\architecture.png
 INPUT .\rag_system.aux
 INPUT .\rag_system.aux
