@@ -151,7 +151,7 @@
 
 % Link to Appendix (Phụ Lục)
 \section{Giải thích thuật ngữ}
-Khi trong bài có từ ngữ chuyên ngành khó hiểu, Ta có thể xem giải thích chi tiết một số thuật ngữ quan trọng dưới đây:
+Khi trong bài có từ ngữ chuyên ngành khó hiểu, bạn có thể xem giải thích chi tiết một số thuật ngữ quan trọng dưới đây:
 
 \begin{itemize}
     \item \textbf{Parse (Phân tích cú pháp):}
@@ -292,8 +292,8 @@ Thay vì chỉ viết các hàm thủ công như Python thông thường, LangCh
             \item xâu chuỗi các hàm sử dụng RunnableSequence sử dụng ký hiệu (`|`), nó hoạt động tương tự như Pipe trong UnixLinux. (ví dụ: func1 | func 2)
             \item chạy song song (`RunnableMap`) cho phép xử lý các hàm 1 cách \textbf{đồng bộ (synchronous)} hoặc \textbf{bất đồng bộ (asynchronous)} mà Ta không cần viết thêm logic phức tạp.
         \end{itemize}
-    
-     \item Việc đối gộp các hàm như 1 khối logic, cho phép người phát triển tư duy theo luồng (pipeline) rõ ràng.  
+
+     \item Việc đối gộp các hàm như 1 khối logic, cho phép người phát triển tư duy theo luồng (pipeline) rõ ràng.
 \end{itemize}
 
 Khác với cách viết hàm truyền thống, \texttt{Runnable} giống như “\textit{block LEGO thông minh}”: dễ lắp, dễ thay, dễ mở rộng. Ngoài ra, Ta cũng có thể xem thêm phần giải thích về \hyperref[app:synchronous_asynchronous]{synchronous và asynchronous} trong phụ lục để hiểu rõ vì sao việc chuyển đổi giữa 2 kiểu thực thi này là quan trọng trong xây dựng ứng dụng quy mô lớn.
@@ -304,7 +304,7 @@ Khác với cách viết hàm truyền thống, \texttt{Runnable} giống như �
 Ví dụ:
 \begin{lstlisting}[language=Python, caption=So sánh cách viết thường vs dùng Runnable trong LangChain]
 # Hàm truyền thống
-def upper(text): 
+def upper(text):
     return text.upper()
 
 # Hàm với LangChain Runnable
@@ -322,17 +322,17 @@ Tuy đoạn code nhìn có vẻ dài hơn, nhưng khi ta muốn kết hợp nhi�
 \textbf{Hỗ trợ sẵn hàng chục thư viện phổ biến:}
 \begin{itemize}
 	\item Ví dụ: Ta có thể dùng FAISS, Chroma, Weaviate,... chỉ với vài dòng code thay vì cấu hình thủ công.
-	\item Tương tự với OpenAI, HuggingFace, Claude, v.v. \\ 
-\end{itemize}  
+	\item Tương tự với OpenAI, HuggingFace, Claude, v.v. \\
+\end{itemize}
 
 
 \noindent
 \textbf{Tối ưu khả năng mở rộng:}
-Ta có thể mở rộng từ một ứng dụng RAG đơn giản sang hệ thống đa tác nhân, phân nhánh, tích hợp phản hồi người dùng (feedback loop) mà không phải viết lại toàn bộ code. \\ 
+Ta có thể mở rộng từ một ứng dụng RAG đơn giản sang hệ thống đa tác nhân, phân nhánh, tích hợp phản hồi người dùng (feedback loop) mà không phải viết lại toàn bộ code. \\
 
 \noindent
 \textbf{Tích hợp dễ dàng với các framework UI như Streamlit, Gradio:}
-Ta có thể kết nối backend LangChain với frontend dễ dàng qua API hoặc trực tiếp embed trong app Streamlit. \\ 
+Ta có thể kết nối backend LangChain với frontend dễ dàng qua API hoặc trực tiếp embed trong app Streamlit. \\
 
 \noindent
 \textbf{Tóm lại:} LangChain không phải là công cụ “thay thế” các thư viện cơ bản, mà là framework kết nối chúng theo một cách mạch lạc, mở rộng được, và giúp Ta tập trung vào logic thay vì xử lý từng bước nhỏ. Nhờ đó, chỉ với 5–10 dòng code Ta đã có được full RAG pipeline, dễ maintain và mở rộng thêm tính năng (chaining, branching, agents…).
@@ -476,12 +476,12 @@ print(result)
 \end{boxC}
 
 \section{Xây dựng mô hình RAG sử dụng LangChain}
+Combo Giải thích theo flow tuyến tuần tự từng bước 1 + Code Snippet (ảnh code).
+\subsection*{Quy trình thực hiện}
+\subsection*{Ví dụ Code Snippet (Minh họa)}
 
 \section{Demo kết quả mô hình RAG cơ bản}
-\subsection*{Quy trình thực hiện}
-
-\subsection*{Ví dụ Code Snippet (Minh họa)}
-\subsection*{Kết quả minh họa}
+Kết quả minh họa
 
 \section{Cải Thiện Mô hình RAG}
 
@@ -504,7 +504,7 @@ print(result)
 \section{Phụ lục giải thích thuật ngữ} \label{app:glossary}
 \begin{itemize}
 	\item \textbf{Embedding (Nhúng):} \label{app:embedding} Để thể hiện ngữ nghĩa của 1 từ 1 cách chính xác nhất, Embedding được sử dụng để chuyển đổi dữ liệu (thường là văn bản) thành các vector đa chiều, giúp máy tính hiểu và xử lý ngữ nghĩa của dữ liệu đó. Mục tiêu là tạo ra các vector sao cho các đối tượng có ý nghĩa tương tự sẽ gần nhau trong không gian vector.
-	
+
     \item \textbf{Parse (Phân tích cú pháp):} \label{app:parse}
     \begin{boxC}
         Trong lập trình và xử lý dữ liệu, "parse" là quá trình \textbf{chuyển đổi một dạng dữ liệu} (thường là một chuỗi văn bản, số, hoặc bất kỳ loại dữ liệu thô nào) \textbf{thành một cấu trúc dữ liệu có ý nghĩa}.
@@ -525,8 +525,8 @@ print(result)
 
         \begin{itemize}
             \item \textbf{Lập trình Đồng bộ (Synchronous Programming - "Từng tác vụ "):} Trong ngữ cảnh lập trình, \textbf{việc bắt đầu của một tác vụ được đồng bộ hóa với việc hoàn thành của tác vụ trước đó}. Nghĩa là các tác vụ thực thi nối tiếp nhau,  \textbf{tác vụ 1 xong thì tác vụ 2 mới bắt đầu}
-            
-            \item \textbf{Lập trình Bất đồng bộ (Asynchronous Programming - "Đồng thời các tác vụ"):} Trong ngữ cảnh lập trình, \textbf{việc bắt đầu của một tác vụ không được đồng bộ hóa với việc hoàn thành của một tác vụ khác}. Nghĩa là chúng có thể chồng lấn trong quá trình thực thi, \textbf{tác vụ 1 họat động song song với tác vụ 2.} 
+
+            \item \textbf{Lập trình Bất đồng bộ (Asynchronous Programming - "Đồng thời các tác vụ"):} Trong ngữ cảnh lập trình, \textbf{việc bắt đầu của một tác vụ không được đồng bộ hóa với việc hoàn thành của một tác vụ khác}. Nghĩa là chúng có thể chồng lấn trong quá trình thực thi, \textbf{tác vụ 1 họat động song song với tác vụ 2.}
             \begin{itemize}
                 \item Các hoạt động trong lập trình bất đồng bộ \textbf{cho phép một chương trình tiếp tục thực thi 1 hoặc nhiều tác vụ trong khi chờ đợi một tác vụ khác hoàn thành} (thường là các hoạt động tốn nhiều thời gian) mà không chặn luồng chính.
                 \item Lưu ý rằng khi chạy bất đồng bộ trên một luồng đơn (single thread), đó chỉ là việc 1 luồng chuyển đổi nhanh chóng giữa các tác vụ khác nhau, tạo ra ảo giác về nó đang xử lý song song.
