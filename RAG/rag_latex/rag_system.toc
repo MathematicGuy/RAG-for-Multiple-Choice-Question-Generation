@@ -8,6 +8,9 @@
 \contentsline {subsection}{\numberline {2}Vấn đề tồn tại khi xây dựng mô hình RAG (không dùng framework)}{4}{subsection.3.2}%
 \contentsline {subsection}{\numberline {3}Giải pháp mà LangChain đưa ra}{5}{subsection.3.3}%
 \contentsline {subsection}{\numberline {4}Giải thích các syntax cơ bản của LangChain}{6}{subsection.3.4}%
+\contentsline {subsubsection}{\numberline {4.1}Khái niệm chính về Runnables trong LangChain}{6}{subsubsection.3.4.1}%
+\contentsline {subsubsection}{\numberline {4.2}Các thành phần API cốt lõi}{7}{subsubsection.3.4.2}%
+\contentsline {subsubsection}{\numberline {4.3}Ví dụ: Hướng tư duy cho bài toán phân biệt cảm xúc xử dụng LangChain}{9}{subsubsection.3.4.3}%
 \contentsline {section}{\numberline {4}Xây dựng mô hình RAG sử dụng LangChain}{10}{section.4}%
 \contentsline {subsection}{\numberline {1}Xác định vấn đề cơ bản}{10}{subsection.4.1}%
 \contentsline {subsection}{\numberline {2}Phân tích các vấn đề của từng thành phần của RAG}{10}{subsection.4.2}%
@@ -15,4 +18,7 @@
 \contentsline {subsubsection}{\numberline {2.2}Retrieval (Truy hồi thông tin)}{10}{subsubsection.4.2.2}%
 \contentsline {subsubsection}{\numberline {2.3}Generation (Sinh câu trả lời)}{11}{subsubsection.4.2.3}%
 \contentsline {subsection}{\numberline {3}Quy trình thực hiện từng Module}{11}{subsection.4.3}%
-\contentsline {section}{\numberline {A}Phụ lục giải thích thuật ngữ}{12}{appendix.A}%
+\contentsline {subsubsection}{\numberline {3.1}Chọn thiết bị tính toán (\texttt {get\_device})}{11}{subsubsection.4.3.1}%
+\contentsline {subsubsection}{\numberline {3.2}Tải mô hình embedding (\texttt {load\_embeddings})}{12}{subsubsection.4.3.2}%
+\contentsline {subsubsection}{\numberline {3.3}Tải và cấu hình LLM (\texttt {load\_llm})}{12}{subsubsection.4.3.3}%
+\contentsline {section}{\numberline {A}Phụ lục giải thích thuật ngữ}{14}{appendix.A}%

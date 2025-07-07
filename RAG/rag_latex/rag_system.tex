@@ -209,7 +209,7 @@ Trong bài viết này, chúng ta xây dựng một Web App đơn giản, sử d
 \vspace{-0.5em}
 \noindent
 \textit{Tại sao dùng RAG?}
-Cho phép câu trả lời được \textbf{dựa trên dữ liệu thực tế}, giảm \textbf{hallucination} và hỗ trợ \textbf{cập nhật thông tin mới} mà không cần fine-tuning lại toàn bộ mô hình. \\ \\
+RAG cho phép câu trả lời được truy vấn \textbf{dựa trên dữ liệu thực tế}, giảm \textbf{hallucination} và hỗ trợ \textbf{cập nhật thông tin mới} mà không cần fine-tuning lại toàn bộ mô hình. \\ \\
 
 \textbf{Một hệ thống RAG cơ bản thường bao gồm:}
 \begin{enumerate}
@@ -341,7 +341,7 @@ Ta có thể kết nối backend LangChain với frontend dễ dàng qua API ho�
 \subsection{Giải thích các syntax cơ bản của LangChain}
 Trong LangChain, các \textbf{Runnable} là những khối xây dựng cơ bản, mỗi Runnable đại diện cho một tác vụ hoặc hoạt động đơn lẻ. Về bản chất, một Runnable là một đối tượng Python được thiết kế để tối ưu hóa hàm của Ta bằng cách sử dụng tính song song.
 
-\subsubsection*{Khái niệm chính về Runnables trong LangChain}
+\subsubsection{Khái niệm chính về Runnables trong LangChain}
 \begin{itemize}
     \item \textbf{Tính mô đun (Modularity):}
     \begin{boxC}
@@ -364,7 +364,7 @@ Trong LangChain, các \textbf{Runnable} là những khối xây dựng cơ bản
     \end{boxC}
 \end{itemize}
 
-\subsubsection*{Các thành phần API cốt lõi}
+\subsubsection{Các thành phần API cốt lõi}
 
 \begin{enumerate}
     \item \textbf{Runnable: Lớp cơ sở (Object)}
@@ -435,7 +435,7 @@ result = uppercase_runnable.invoke("langchain")
     \end{boxC}
 \end{enumerate}
 
-\subsubsection*{Ví dụ: Hướng tư duy cho bài toán phân biệt cảm xúc xử dụng LangChain}
+\subsubsection{Ví dụ: Hướng tư duy cho bài toán phân biệt cảm xúc xử dụng LangChain}
 \begin{boxC}
     \textbf{Bài toán:} Xử lý phản hồi của khách hàng, phân loại cảm xúc và tóm tắt nó.
     \begin{enumerate}
@@ -555,7 +555,7 @@ print(result)
 \subsection{Quy trình thực hiện từng Module}
 \label{sec:code_modules}
 
-\subsubsection*{Chọn thiết bị tính toán (\texttt{get\_device})}
+\subsubsection{Chọn thiết bị tính toán (\texttt{get\_device})}
 
 \textit{Vấn đề:} Phải xác định xem GPU có thể tăng tốc hay không. Nếu dùng CPU mặc định, tốc độ sẽ rất chậm khi chạy embedding hay inference LLM.\\
 
@@ -569,92 +569,92 @@ def get_device():
 \end{lstlisting}
 
 
-% \subsubsection*{Tải mô hình embedding (\texttt{load\_embeddings})}
+\subsubsection{Tải mô hình embedding (\texttt{load\_embeddings})}
 
-% \textit{Vấn đề:} Cần biến mỗi đoạn văn thành vector để so sánh ngữ nghĩa, đồng thời chọn model embedding phù hợp với ngôn ngữ tiếng Việt.\\
+\textit{Vấn đề:} Cần biến mỗi đoạn văn thành vector để so sánh ngữ nghĩa, đồng thời chọn model embedding phù hợp với ngôn ngữ tiếng Việt.\\
 
-% \textit{Giải pháp:} Dùng \texttt{HuggingFaceEmbeddings} với một mô hình bi‑encoder đã tiền huấn luyện cho tiếng Việt để đảm bảo chất lượng vector tốt.\\
+\textit{Giải pháp:} Dùng \texttt{HuggingFaceEmbeddings} với một mô hình bi‑encoder đã tiền huấn luyện cho tiếng Việt để đảm bảo chất lượng vector tốt.\\
 
-% \begin{lstlisting}[language=Python, caption=Tải embedding model với comment giải thích]
-% def load_embeddings():
-%     # Khởi tạo HuggingFaceEmbeddings:
-%     # - model_name: tên mô hình bi-encoder trên HuggingFace Hub, hỗ trợ tiếng Việt
-%     #   (“bkai-foundation-models/vietnamese-bi-encoder”)
-%     # - embeddings sẽ được dùng để mã hóa các chunk thành vector ngữ nghĩa
-%     return HuggingFaceEmbeddings(
-%         model_name="bkai-foundation-models/vietnamese-bi-encoder"
-%     )
-% \end{lstlisting}
-
-
-% \subsubsection*{Tải và cấu hình LLM (\texttt{load\_llm})}
-
-% \textit{Vấn đề:} Muốn sinh câu trả lời, cần load mô hình causal LM đã huấn luyện sẵn, tối ưu bộ nhớ và gán token để xác thực với HuggingFace.\\
-
-% \noindent\textit{Giải pháp:}
-% \begin{itemize}
-%     \item Sử dụng cấu hình quantization 4-bit (\texttt{BitsAndBytesConfig}) để giảm footprint trên GPU/CPU.
-%     \item Tự động load token từ file \texttt{token.txt} để bảo mật API key.
-%     \item Dùng \texttt{transformers.pipeline} cho task \texttt{"text-generation"}.
-%     \item Bọc pipeline vào \texttt{HuggingFacePipeline} của LangChain để dễ tích hợp với các \texttt{Runnable}.
-% \end{itemize}
-
-% \begin{lstlisting}[language=Python, caption=Tải và cấu hình LLM với comment giải thích]
-% def load_llm(model_name):
-%     # Kiểm tra file token và đọc HuggingFace token để xác thực
-%     token_path = Path("token.txt")
-%     if not token_path.exists():
-%         raise FileNotFoundError("Missing HuggingFace token.txt")
-%     hf_token = token_path.read_text().strip()
-
-%     # Cấu hình cho quantization 4-bit:
-%     # - load_in_4bit: bật chế độ 4-bit
-%     # - bnb_*: các tham số tùy chỉnh cho chất lượng và tốc độ
-%     bnb_config = BitsAndBytesConfig(
-%         load_in_4bit=True,
-%         bnb_4bit_use_double_quant=True,
-%         bnb_4bit_compute_dtype=torch.bfloat16,
-%         bnb_4bit_quant_type="nf4"
-%     )
-
-%     # Load mô hình causal LM đã huấn luyện sẵn:
-%     # - model_name: tên repo trên HuggingFace (ví dụ "google/gemma-2b-it")
-%     # - quantization_config: cấu hình 4-bit ở trên
-%     # - low_cpu_mem_usage: tối ưu bộ nhớ khi load model
-%     # - device_map="auto": tự động phân bổ model giữa CPU/GPU
-%     # - token=hf_token: xác thực truy cập private repo nếu cần
-%     model = AutoModelForCausalLM.from_pretrained(
-%         model_name,
-%         quantization_config=bnb_config,
-%         low_cpu_mem_usage=True,
-%         device_map="auto",
-%         token=hf_token
-%     )
-
-%     # Load tokenizer tương ứng và đặt pad_token trùng eos_token
-%     tokenizer = AutoTokenizer.from_pretrained(model_name)
-%     tokenizer.pad_token = tokenizer.eos_token
-
-%     # Tạo pipeline text-generation:
-%     # - max_new_tokens: giới hạn số token sinh ra
-%     # - pad_token_id: id dùng để padding
-%     # - device_map="auto": phân phối device cuda/cpu/gpu tự động
-%     model_pipeline = pipeline(
-%         "text-generation",
-%         model=model,
-%         tokenizer=tokenizer,
-%         max_new_tokens=512,
-%         pad_token_id=tokenizer.eos_token_id,
-%         device_map="auto"
-%     )
-
-%     # Bọc vào HuggingFacePipeline của LangChain
-%     return HuggingFacePipeline(pipeline=model_pipeline)
-% \end{lstlisting}
+\begin{lstlisting}[language=Python, caption=Tải embedding model với comment giải thích]
+def load_embeddings():
+    # Khởi tạo HuggingFaceEmbeddings:
+    # - model_name: tên mô hình bi-encoder trên HuggingFace Hub, hỗ trợ tiếng Việt
+    #   (“bkai-foundation-models/vietnamese-bi-encoder”)
+    # - embeddings sẽ được dùng để mã hóa các chunk thành vector ngữ nghĩa
+    return HuggingFaceEmbeddings(
+        model_name="bkai-foundation-models/vietnamese-bi-encoder"
+    )
+\end{lstlisting}
 
 
+\subsubsection{Tải và cấu hình LLM (\texttt{load\_llm})}
 
-% \subsubsection*{Đọc tài liệu PDF (\texttt{load\_documents})}
+\textit{Vấn đề:} Muốn sinh câu trả lời, cần load mô hình causal LM đã huấn luyện sẵn, tối ưu bộ nhớ và gán token để xác thực với HuggingFace.\\
+
+\noindent\textit{Giải pháp:}
+\begin{itemize}
+    \item Sử dụng cấu hình quantization 4-bit (\texttt{BitsAndBytesConfig}) để giảm footprint trên GPU/CPU.
+    \item Tự động load token từ file \texttt{token.txt} để bảo mật API key.
+    \item Dùng \texttt{transformers.pipeline} cho task \texttt{"text-generation"}.
+    \item Bọc pipeline vào \texttt{HuggingFacePipeline} của LangChain để dễ tích hợp với các \texttt{Runnable}.
+\end{itemize}
+
+\begin{lstlisting}[language=Python, caption=Tải và cấu hình LLM với comment giải thích]
+def load_llm(model_name):
+    # Kiểm tra file token và đọc HuggingFace token để xác thực
+    token_path = Path("token.txt")
+    if not token_path.exists():
+        raise FileNotFoundError("Missing HuggingFace token.txt")
+    hf_token = token_path.read_text().strip()
+
+    # Cấu hình cho quantization 4-bit:
+    # - load_in_4bit: bật chế độ 4-bit
+    # - bnb_*: các tham số tùy chỉnh cho chất lượng và tốc độ
+    bnb_config = BitsAndBytesConfig(
+        load_in_4bit=True,
+        bnb_4bit_use_double_quant=True,
+        bnb_4bit_compute_dtype=torch.bfloat16,
+        bnb_4bit_quant_type="nf4"
+    )
+
+    # Load mô hình causal LM đã huấn luyện sẵn:
+    # - model_name: tên repo trên HuggingFace (ví dụ "google/gemma-2b-it")
+    # - quantization_config: cấu hình 4-bit ở trên
+    # - low_cpu_mem_usage: tối ưu bộ nhớ khi load model
+    # - device_map="auto": tự động phân bổ model giữa CPU/GPU
+    # - token=hf_token: xác thực truy cập private repo nếu cần
+    model = AutoModelForCausalLM.from_pretrained(
+        model_name,
+        quantization_config=bnb_config,
+        low_cpu_mem_usage=True,
+        device_map="auto",
+        token=hf_token
+    )
+
+    # Load tokenizer tương ứng và đặt pad_token trùng eos_token
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    tokenizer.pad_token = tokenizer.eos_token
+
+    # Tạo pipeline text-generation:
+    # - max_new_tokens: giới hạn số token sinh ra
+    # - pad_token_id: id dùng để padding
+    # - device_map="auto": phân phối device cuda/cpu/gpu tự động
+    model_pipeline = pipeline(
+        "text-generation",
+        model=model,
+        tokenizer=tokenizer,
+        max_new_tokens=512,
+        pad_token_id=tokenizer.eos_token_id,
+        device_map="auto"
+    )
+
+    # Bọc vào HuggingFacePipeline của LangChain
+    return HuggingFacePipeline(pipeline=model_pipeline)
+\end{lstlisting}
+
+
+
+% \subsubsection{Đọc tài liệu PDF (\texttt{load\_documents})}
 
 % \textit{Vấn đề:} PDF phức tạp, không thể đọc bằng open‑file thông thường; cần thư viện chuyên dụng để trích xuất văn bản.\\
 
@@ -684,7 +684,7 @@ def get_device():
 % \end{lstlisting}
 
 
-% \subsubsection*{Xây dựng pipeline RAG (\texttt{build\_rag\_chain})}
+% \subsubsection{Xây dựng pipeline RAG (\texttt{build\_rag\_chain})}
 
 % \textit{Vấn đề:} Cần kết hợp chunking, lưu vector, truy hồi, prompt và LLM thành một pipeline duy nhất, dễ debug và mở rộng.\\
 
@@ -736,7 +736,7 @@ def get_device():
 % \end{lstlisting}
 
 
-% \subsubsection*{Khởi chạy ứng dụng (\texttt{main})}
+% \subsubsection{Khởi chạy ứng dụng (\texttt{main})}
 
 % \textit{Vấn đề:} Cần đồng bộ các bước load, build pipeline và truy vấn — đồng thời hiển thị thời gian và kết quả.\\
 % \noindent \textit{Giải pháp:} Viết hàm \texttt{main()} thứ tự rõ ràng: lấy device, load embeddings/LLM, load docs, build chain, invoke question, in ra kết quả.\\
@@ -822,7 +822,7 @@ def get_device():
 
 % \subsection{Cải tiến tốc độ truy vấn sử dụng FAISS}
 
-% \subsubsection*{Lợi ích khi sử dụng FAISS:}
+% \subsubsection{Lợi ích khi sử dụng FAISS:}
 
 % \noindent\textit{Vấn đề:} Khi kho vector lớn (hàng trăm ngàn chunk), truy vấn bằng Chroma/Weaviate có thể chậm do overhead kết nối mạng hoặc cơ chế indirection.\\
 
@@ -834,7 +834,7 @@ def get_device():
 % \end{itemize}
 
 
-% \subsubsection*{Cách tích hợp FAISS với LangChain:}
+% \subsubsection{Cách tích hợp FAISS với LangChain:}
 
 % \noindent \textit{Giải pháp:} Thay thế \texttt{Chroma} bằng \texttt{FAISS} thông qua abstraction \texttt{VectorStore}:
 
@@ -905,11 +905,8 @@ def get_device():
             \item Minh họa: Hãy xem xét biểu thức toán học "4+10". Đối với máy tính, đây chỉ là các ký tự riêng lẻ '4', '+', '1', '0'. Để thực hiện phép tính, máy tính phải "parse" biểu thức này. Một chương trình phân tích cú pháp sẽ nhận diện '+' là phép cộng, và từ đó biết rằng các ký tự đứng trước và sau nó là các chữ số biểu thị hai số cần cộng. Nó sẽ tạo ra một cấu trúc mới để biểu diễn thông tin này một cách tốt hơn cho phần tiếp theo của chương trình, ví dụ như chuyển "4" thành số nhị phân 100 và "10" thành 1010, và biểu thức "4+10" thành một dạng dễ hiểu hơn cho máy tính như: `ADD 100 1010`.
         \end{itemize}
     \end{boxC}
-1
-    \item \textbf{Protocol (Giao thức):} \label{app:protocol}
-    \begin{boxC}
-        Là một tập hợp các quy tắc, định dạng và quy trình chuẩn mực \textbf{quy định cách dữ liệu được truyền tải và nhận giữa các thiết bị hoặc chương trình} trong một mạng. Giao thức đảm bảo rằng các bên tham gia có thể giao tiếp một cách hiệu quả và hiểu được thông điệp của nhau.
-    \end{boxC}
+
+    \item \textbf{Protocol (Giao thức):} \label{app:protocol} Là một tập hợp các quy tắc, định dạng và quy trình chuẩn mực \textbf{quy định cách dữ liệu được truyền tải và nhận giữa các thiết bị hoặc chương trình} trong một mạng. Giao thức đảm bảo rằng các bên tham gia có thể giao tiếp một cách hiệu quả và hiểu được thông điệp của nhau.
 
     \item \textbf{Synchronous (Đồng bộ) và Asynchronous (Bất đồng bộ):} \label{app:synchronous_asynchronous}
     \begin{boxC}
@@ -924,15 +921,14 @@ def get_device():
                 \item Lưu ý rằng khi chạy bất đồng bộ trên một luồng đơn (single thread), đó chỉ là việc 1 luồng chuyển đổi nhanh chóng giữa các tác vụ khác nhau, tạo ra ảo giác về nó đang xử lý song song.
                 \item Lợi ích của lập trình bất đồng bộ thường được nhận thấy rõ rệt nhất trong Giao diện người dùng (User Interface - UI), nó giúp UI không bị "đóng băng" khi một hoạt động nặng đang chạy ngầm.
             \end{itemize}
-
-	\item \textbf{LangChain Expression Language (LCEL)}
-	\begin{boxC}
-		\textbf{LangChain Expression Language (LCEL)} là một cú pháp được tạo ra để giúp chạy các chuỗi (chains) một cách tối ưu, dù là đồng bộ (song song) hay bất đồng bộ (không song song), bằng cách kết hợp các \texttt{Runnable} với nhau.
-		LCEL rất phù hợp cho các chuỗi đơn giản (ví dụ: prompt + llm + parser). Tuy nhiên, LangGraph được khuyến nghị để mở rộng thêm khi Ta xây dựng các chuỗi phức tạp hơn (ví dụ: có phân nhánh, vòng lặp, nhiều tác nhân, v.v.). Lưu ý rằng LCEL vẫn có thể được sử dụng trong LangGraph.
+		\end{itemize}
 	\end{boxC}
 
-        \end{itemize}
-    \end{boxC}
+	\item \textbf{LangChain Expression Language (LCEL)}
+	LangChain Expression Language là một cú pháp được tạo ra để giúp chạy các chuỗi (chains) một cách tối ưu, dù là đồng bộ (song song) hay bất đồng bộ (không song song), bằng cách kết hợp các \texttt{Runnable} với nhau.
+	LCEL rất phù hợp cho các chuỗi đơn giản (ví dụ: prompt + llm + parser). Tuy nhiên, LangGraph được khuyến nghị để mở rộng thêm khi Ta xây dựng các chuỗi phức tạp hơn (ví dụ: có phân nhánh, vòng lặp, nhiều tác nhân, v.v.). Lưu ý rằng LCEL vẫn có thể được sử dụng trong LangGraph.
+
+
 \end{itemize}
 \newpage
 

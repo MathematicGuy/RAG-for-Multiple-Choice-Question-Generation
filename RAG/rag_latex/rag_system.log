@@ -1,7 +1,11 @@
-This is LuaHBTeX, Version 1.17.1 (MiKTeX 24.1) (format=lualatex 2025.1.5)  7 JUL 2025 10:47
+This is LuaHBTeX, Version 1.17.1 (MiKTeX 24.1) (format=lualatex 2025.1.5)  7 JUL 2025 11:12
  restricted system commands enabled.
-**rag_system.tex
-(./rag_system.tex
+ file:line:error style messages enabled.
+**"d:/CMC_UNI/Final Year/Graduation_Project/RAG-for-Multiple-Choice-Question-Ge
+neration/RAG/rag_latex/rag_system.tex"
+
+("d:/CMC_UNI/Final Year/Graduation_Project/RAG-for-Multiple-Choice-Question-Gen
+eration/RAG/rag_latex/rag_system.tex"
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-04>
 Lua module: luaotfload 2023-08-31 3.26 Lua based OpenType font support
@@ -1332,7 +1336,7 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 
 warning  (pdf backend): ignoring duplicate destination with the name 'page.1'
 [1]
-<architecture.png, id=105, 615.0478pt x 300.3722pt>
+<architecture.png, id=136, 615.0478pt x 300.3722pt>
 File: architecture.png Graphic file (type png)
 <use architecture.png>
 Package luatex.def Info: architecture.png  used on input line 187.
@@ -1503,6 +1507,11 @@ Underfull \hbox (badness 10000) in paragraph at lines 562--563
  []
 
 
+Underfull \hbox (badness 10000) in paragraph at lines 574--575
+
+ []
+
+
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
 (fancyhdr)                Make it at least 13.59999pt, for example:
 (fancyhdr)                \setlength{\headheight}{13.59999pt}.
@@ -1510,6 +1519,15 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
 
 [11]
+Underfull \hbox (badness 10000) in paragraph at lines 576--577
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 592--593
+
+ []
+
 
 Package fancyhdr Warning: \headheight is too small (12.0pt): 
 (fancyhdr)                Make it at least 13.59999pt, for example:
@@ -1517,7 +1535,23 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
 
-[12
+[12]
+
+Package fancyhdr Warning: \headheight is too small (12.0pt): 
+(fancyhdr)                Make it at least 13.59999pt, for example:
+(fancyhdr)                \setlength{\headheight}{13.59999pt}.
+(fancyhdr)                You might also make \topmargin smaller:
+(fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
+
+[13]
+
+Package fancyhdr Warning: \headheight is too small (12.0pt): 
+(fancyhdr)                Make it at least 13.59999pt, for example:
+(fancyhdr)                \setlength{\headheight}{13.59999pt}.
+(fancyhdr)                You might also make \topmargin smaller:
+(fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
+
+[14
 
 ]
 
@@ -1527,31 +1561,31 @@ Package fancyhdr Warning: \headheight is too small (12.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-1.59999pt}.
 
-[13] (./rag_system.aux)
+[15] (./rag_system.aux)
  ***********
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-04>
  ***********
 Package rerunfilecheck Info: File `rag_system.out' has not changed.
-(rerunfilecheck)             Checksum: 0E3065959B637C385EF0D4E698D22E88;4092.
+(rerunfilecheck)             Checksum: 4B9A3835C0B6F0E1F9E58BD1BC5BF8BC;5961.
 )
 
 Here is how much of LuaTeX's memory you used:
- 33285 strings out of 476497
- 305279,1977958 words of node,token memory allocated
+ 33388 strings out of 476497
+ 477011,1977958 words of node,token memory allocated
  566 words of node memory still in use:
    6 hlist, 2 vlist, 2 rule, 2 glue, 4 kern, 1 glyph, 13 attribute, 63 glue_spec
 , 8 attribute_list, 2 write, 1 pdf_action nodes
-   avail lists: 1:1,2:8575,3:569,4:5386,5:4407,6:104,7:10780,8:2,9:13519,10:40,1
-1:687
- 54419 multiletter control sequences out of 65536+600000
+   avail lists: 2:9053,3:581,4:8126,5:6789,6:105,7:14606,8:2,9:20466,10:40,11:10
+98
+ 54453 multiletter control sequences out of 65536+600000
  91 fonts using 31585767 bytes
- 87i,12n,90p,823b,1139s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 87i,12n,90p,924b,958s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <C:/WINDOWS/Fonts/courbd.ttf><C:/WINDOWS/Fonts/timesi.ttf><C:/WINDOWS/Fonts/cour
 .ttf><C:/WINDOWS/Fonts/times.ttf><C:/WINDOWS/Fonts/timesbd.ttf>
-Output written on rag_system.pdf (14 pages, 304896 bytes).
+Output written on rag_system.pdf (16 pages, 329409 bytes).
 
-PDF statistics: 316 PDF objects out of 1000 (max. 8388607)
- 142 named destinations out of 1000 (max. 131072)
- 152 words of extra memory for PDF output out of 10000 (max. 100000000)
+PDF statistics: 416 PDF objects out of 1000 (max. 8388607)
+ 210 named destinations out of 1000 (max. 131072)
+ 200 words of extra memory for PDF output out of 10000 (max. 100000000)
 
