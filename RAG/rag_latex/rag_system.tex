@@ -47,7 +47,7 @@
     \LARGE\bfseries\textcolor{cyan}
     \end{center}
 }
-\title{{Module Project}\\[0.5em]\textcolor{cyan}{RAG (Retrieval-Augmented Generation) sử dụng Streamlit}}
+\title{{Module Project}\\[0.5em]\textcolor{cyan}{RAG (Retrieval-Augmented Generation) sử dụng LangChain}}
 \author{Đinh Nhật Thành}
 \date{}
 \renewcommand{\maketitle}{}
@@ -293,7 +293,7 @@ Thay vì chỉ viết các hàm thủ công như Python thông thường, LangCh
             \item chạy song song (`RunnableMap`) cho phép xử lý các hàm 1 cách \textbf{đồng bộ (synchronous)} hoặc \textbf{bất đồng bộ (asynchronous)} mà Ta không cần viết thêm logic phức tạp.
         \end{itemize}
 
-     \item Việc đối gộp các hàm như 1 khối logic, cho phép người phát triển tư duy theo luồng (pipeline) rõ ràng.
+	\item Việc đối gộp các hàm như 1 khối logic, cho phép người phát triển tư duy theo luồng (pipeline) rõ ràng.
 \end{itemize}
 
 Khác với cách viết hàm truyền thống, \texttt{Runnable} giống như “\textit{block LEGO thông minh}”: dễ lắp, dễ thay, dễ mở rộng. Ngoài ra, Ta cũng có thể xem thêm phần giải thích về \hyperref[app:synchronous_asynchronous]{synchronous và asynchronous} trong phụ lục để hiểu rõ vì sao việc chuyển đổi giữa 2 kiểu thực thi này là quan trọng trong xây dựng ứng dụng quy mô lớn.
@@ -569,327 +569,326 @@ def get_device():
 \end{lstlisting}
 
 
-\subsubsection*{Tải mô hình embedding (\texttt{load\_embeddings})}
-
-\textit{Vấn đề:} Cần biến mỗi đoạn văn thành vector để so sánh ngữ nghĩa, đồng thời chọn model embedding phù hợp với ngôn ngữ tiếng Việt.\\
-
-\textit{Giải pháp:} Dùng \texttt{HuggingFaceEmbeddings} với một mô hình bi‑encoder đã tiền huấn luyện cho tiếng Việt để đảm bảo chất lượng vector tốt.\\
-
-\begin{lstlisting}[language=Python, caption=Tải embedding model với comment giải thích]
-def load_embeddings():
-    # Khởi tạo HuggingFaceEmbeddings:
-    # - model_name: tên mô hình bi-encoder trên HuggingFace Hub, hỗ trợ tiếng Việt
-    #   (“bkai-foundation-models/vietnamese-bi-encoder”)
-    # - embeddings sẽ được dùng để mã hóa các chunk thành vector ngữ nghĩa
-    return HuggingFaceEmbeddings(
-        model_name="bkai-foundation-models/vietnamese-bi-encoder"
-    )
-\end{lstlisting}
-
-
-\subsubsection*{Tải và cấu hình LLM (\texttt{load\_llm})}
-
-\textit{Vấn đề:} Muốn sinh câu trả lời, cần load mô hình causal LM đã huấn luyện sẵn, tối ưu bộ nhớ và gán token để xác thực với HuggingFace.\\
-
-\noindent\textit{Giải pháp:}
-\begin{itemize}
-    \item Sử dụng cấu hình quantization 4-bit (\texttt{BitsAndBytesConfig}) để giảm footprint trên GPU/CPU.
-    \item Tự động load token từ file \texttt{token.txt} để bảo mật API key.
-    \item Dùng \texttt{transformers.pipeline} cho task \texttt{"text-generation"}.
-    \item Bọc pipeline vào \texttt{HuggingFacePipeline} của LangChain để dễ tích hợp với các \texttt{Runnable}.
-\end{itemize}
-
-\begin{lstlisting}[language=Python, caption=Tải và cấu hình LLM với comment giải thích]
-def load_llm(model_name):
-    # Kiểm tra file token và đọc HuggingFace token để xác thực
-    token_path = Path("token.txt")
-    if not token_path.exists():
-        raise FileNotFoundError("Missing HuggingFace token.txt")
-    hf_token = token_path.read_text().strip()
-
-    # Cấu hình cho quantization 4-bit:
-    # - load_in_4bit: bật chế độ 4-bit
-    # - bnb_*: các tham số tùy chỉnh cho chất lượng và tốc độ
-    bnb_config = BitsAndBytesConfig(
-        load_in_4bit=True,
-        bnb_4bit_use_double_quant=True,
-        bnb_4bit_compute_dtype=torch.bfloat16,
-        bnb_4bit_quant_type="nf4"
-    )
-
-    # Load mô hình causal LM đã huấn luyện sẵn:
-    # - model_name: tên repo trên HuggingFace (ví dụ "google/gemma-2b-it")
-    # - quantization_config: cấu hình 4-bit ở trên
-    # - low_cpu_mem_usage: tối ưu bộ nhớ khi load model
-    # - device_map="auto": tự động phân bổ model giữa CPU/GPU
-    # - token=hf_token: xác thực truy cập private repo nếu cần
-    model = AutoModelForCausalLM.from_pretrained(
-        model_name,
-        quantization_config=bnb_config,
-        low_cpu_mem_usage=True,
-        device_map="auto",
-        token=hf_token
-    )
-
-    # Load tokenizer tương ứng và đặt pad_token trùng eos_token
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    tokenizer.pad_token = tokenizer.eos_token
-
-    # Tạo pipeline text-generation:
-    # - max_new_tokens: giới hạn số token sinh ra
-    # - pad_token_id: id dùng để padding
-    # - device_map="auto": phân phối device cuda/cpu/gpu tự động
-    model_pipeline = pipeline(
-        "text-generation",
-        model=model,
-        tokenizer=tokenizer,
-        max_new_tokens=512,
-        pad_token_id=tokenizer.eos_token_id,
-        device_map="auto"
-    )
-
-    # Bọc vào HuggingFacePipeline của LangChain
-    return HuggingFacePipeline(pipeline=model_pipeline)
-\end{lstlisting}
-
-
-
-\subsubsection*{Đọc tài liệu PDF (\texttt{load\_documents})}
-
-\textit{Vấn đề:} PDF phức tạp, không thể đọc bằng open‑file thông thường; cần thư viện chuyên dụng để trích xuất văn bản.\\
-
-\noindent \textit{Giải pháp:} Dùng \texttt{PyPDFLoader} của LangChain Community để load từng trang thành document objects và bắt lỗi khi load thất bại.\\
-
-\begin{lstlisting}[language=Python, caption=Đọc và load nhiều PDF]
-def load_documents(folder_path):
-    folder = Path(folder_path.strip().strip('"\''))
-
-    if not folder.exists():
-        raise FileNotFoundError(f"Folder not found: {folder}")
-
-    pdf_files = list(folder.glob("*.pdf"))
-    if not pdf_files:
-        raise ValueError(f"No PDF files in folder: {folder}")
-
-    all_docs, filenames = [], []
-    for pdf_file in pdf_files:
-        try:
-            docs = PyPDFLoader(str(pdf_file)).load()
-            all_docs.extend(docs)
-            filenames.append(pdf_file.name)
-            print(f"✅ Loaded {pdf_file.name} ({len(docs)} pages)")
-        except Exception as e:
-            print(f"❌ Failed loading {pdf_file.name}: {e}")
-    return all_docs, filenames
-\end{lstlisting}
-
-
-\subsubsection*{Xây dựng pipeline RAG (\texttt{build\_rag\_chain})}
-
-\textit{Vấn đề:} Cần kết hợp chunking, lưu vector, truy hồi, prompt và LLM thành một pipeline duy nhất, dễ debug và mở rộng.\\
-
-\noindent \textit{Giải pháp:}
-\begin{itemize}
-	\item Dùng \texttt{SemanticChunker} chia ngữ nghĩa.
-	\item Dùng \texttt{Chroma.from\_documents} để tạo vector store.
-	\item Lấy \texttt{retriever = vectordb.as\_retriever()} chuẩn hoá.
-	\item Dùng \texttt{RunnableMap} để song song format context và giữ question.
-	\item Ghép với \texttt{PromptTemplate} và \texttt{JsonOutputParser} để ra JSON.
-\end{itemize}
-
-\begin{lstlisting}[language=Python, caption=Xây dựng RAG chain với LangChain]
-def build_rag_chain(docs, embeddings, llm):
-    chunker = SemanticChunker(
-        embeddings=embeddings,
-        buffer_size=1,
-        breakpoint_threshold_type="percentile",
-        breakpoint_threshold_amount=95,
-        min_chunk_size=500,
-        add_start_index=True
-    )
-
-    chunks = chunker.split_documents(docs)
-    vector_db = FAISS.from_documents(chunks, embedding=embeddings)
-    retriever = vector_db.as_retriever(top_k=5)
-
-    # Prompt mới: chỉ yêu cầu trả lời câu hỏi ngắn gọn không định dạng JSON
-    prompt = PromptTemplate.from_template("""
-    You are an assistant for question-answering tasks. Use the following pieces of
-    retrieved context to answer the question. If you don't know the answer, just say that
-    you don't know. Use three sentences maximum and keep the answer concise.
-    Question: {question}
-    Context: {context}
-    Answer:
-    """)
-
-    rag_chain = (
-        RunnableMap({
-            'context': retriever | (lambda docs: "\n\n".join(d.page_content for d in docs)),
-            'question': RunnablePassthrough()
-        })
-        | prompt
-        | llm
-        | StrOutputParser()
-    )
-
-    return rag_chain, len(chunks)
-\end{lstlisting}
-
-
-\subsubsection*{Khởi chạy ứng dụng (\texttt{main})}
-
-\textit{Vấn đề:} Cần đồng bộ các bước load, build pipeline và truy vấn — đồng thời hiển thị thời gian và kết quả.\\
-\noindent \textit{Giải pháp:} Viết hàm \texttt{main()} thứ tự rõ ràng: lấy device, load embeddings/LLM, load docs, build chain, invoke question, in ra kết quả.\\
-
-\begin{lstlisting}[language=Python, caption=Hàm chính khởi chạy RAG App]
-def main():
-    get_device()
-    embeddings = load_embeddings()
-    llm = load_llm("google/gemma-2b-it")
-    docs, filenames = load_documents("pdf_folder")
-    rag_chain, num_chunks = build_rag_chain(docs, embeddings, llm)
-
-    print(f"Ready: {len(filenames)} files, {num_chunks} chunks")
-
-    while True:
-        user_input = input("\nYour question (type 'exit' to quit): ")
-        if user_input.lower() == "exit":
-            break
-
-        print("\nGenerating answer...")
-        start = time.time()
-        response = rag_chain.invoke(user_input)
-        print("OUTPUT:", response)
-        print(f"⏱️ Time taken: {time.time() - start:.2f}s")
-\end{lstlisting}
-
-\section{Cải Thiện Mô hình RAG}
-Sau khi đã có mô hình RAG cơ bản, trong phần này chúng ta sẽ tập trung vào các cải thiện chính sau:
-\begin{itemizize}
-\item Cải thiện Retrieval 1: Tăng tốc độ truy vấn bằng FAISS
-\item Generation: Cải thiện format Output thành JSON. Đảm bảo Output có cấu trúc nhất quán và dễ dàng tái sử dụng.
-\end{itemizize}
-
-\subsection{Prompting có cấu trúc (Structured Prompting)}
-
-\textit{Vấn đề:} Khi ghép context và câu hỏi vào prompt thủ công, dễ bị thiếu nhất quán, LLM trả lời lạc đề hoặc không theo định dạng mong muốn.\\
-
-\noindent \textit{Giải pháp:} Sử dụng \texttt{PromptTemplate} để định nghĩa sẵn cấu trúc prompt, bảo đảm mọi truy vấn đều theo cùng một khung mẫu.\\
-
-\begin{lstlisting}[language=Python, caption=Sử dụng PromptTemplate cho Structured Prompting]
-from langchain_core.prompts import PromptTemplate
-
-# Định nghĩa mẫu prompt có cấu trúc
-prompt_structured = PromptTemplate.from_template(
-    prompt_text = """
-        Bạn là một trợ lý chuyên thực hiện các nhiệm vụ trả lời câu hỏi.
-        Hãy sử dụng các phần nội dung được truy xuất bên dưới để trả lời câu hỏi.
-        Nếu bạn không biết câu trả lời, chỉ cần nói rằng bạn không biết.
-
-        Yêu cầu: Hãy trả về phản hồi dưới dạng một đối tượng JSON hợp lệ, với đúng ba khóa: "context", "question" và "answer". Chỉ xuất ra đối tượng JSON, không thêm bất kỳ nội dung nào khác.
-
-        Ví dụ về đầu ra JSON:
-        \{\{
-            "context": "OOP là một mô hình lập trình dựa trên khái niệm đối tượng.",
-            "question": "OOP là gì?",
-            "answer": "OOP là viết tắt của Lập trình hướng đối tượng, một mô hình tổ chức thiết kế phần mềm xung quanh dữ liệu hoặc đối tượng, thay vì các hàm và logic."
-        \}\}
-
-        Context: {context}
-        Question: {question}
-        Answer:
-    """ #? \{\} mean Variable. Use \{{ }\} "escape" the curly braces in your example JSON so that LangChain treats them as literal text,
-
-    prompt_template = PromptTemplate.from_template(prompt_text)
-)
-\end{lstlisting}
-
-
-\subsection{Các kiểu Prompt khác nhau}
-
-\textit{Vấn đề:} Một prompt chung không phù hợp cho mọi loại truy vấn (tóm tắt, dịch, phân tích sentiment…).\\
-
-\noindent \textit{Giải pháp:} Xây dựng các loại prompt tùy theo mục đích, ví dụ:
-\begin{itemize}
-    \item \textbf{QA Prompt:} dành cho hỏi–đáp thông tin.
-    \item \textbf{Summarization Prompt:} dành cho tóm tắt nội dung, chỉ yêu cầu tóm gọn ý chính.
-    \item \textbf{Translation Prompt:} dành cho dịch văn bản, yêu cầu giữ nguyên ngữ điệu.
-    \item \textbf{Sentiment Prompt:} dành cho phân tích cảm xúc, trả về Positive/Negative.
-\end{itemize}
-
-\noindent
-Mỗi loại prompt dùng một \texttt{PromptTemplate} riêng, đảm bảo LLM hiểu đúng ngữ cảnh và mục đích của tác vụ.
-
-\subsection{Cải tiến tốc độ truy vấn sử dụng FAISS}
-
-\subsubsection*{Lợi ích khi sử dụng FAISS:}
-
-\noindent\textit{Vấn đề:} Khi kho vector lớn (hàng trăm ngàn chunk), truy vấn bằng Chroma/Weaviate có thể chậm do overhead kết nối mạng hoặc cơ chế indirection.\\
-
-\textbf{Lợi ích:}
-\begin{itemize}
-    \item \textbf{Tốc độ cao:} FAISS là thư viện C++ tối ưu cho nearest neighbor search, truy vấn vector in-memory rất nhanh.
-    \item \textbf{Tiêu thụ tài nguyên thấp:} Chạy local, không cần server riêng, giảm độ trễ.
-    \item \textbf{Module hóa dễ dàng:} Có thể thay thế backend chỉ với một dòng code thay vì tái cấu trúc toàn bộ pipeline.
-\end{itemize}
-
-
-\subsubsection*{Cách tích hợp FAISS với LangChain:}
-
-\noindent \textit{Giải pháp:} Thay thế \texttt{Chroma} bằng \texttt{FAISS} thông qua abstraction \texttt{VectorStore}:
-
-\begin{lstlisting}[language=Python, caption=Tích hợp FAISS với LangChain]
-from langchain.vectorstores import FAISS
-from langchain_huggingface.embeddings import HuggingFaceEmbeddings
-
-# 1. Tạo embeddings như trước
-embeddings = HuggingFaceEmbeddings(model_name="bkai-foundation-models/vietnamese-bi-encoder")
-
-# 2. Khởi tạo FAISS từ list of documents
-vector_db = FAISS.from_documents(
-    documents=chunks,
-    embedding=embeddings
-)
-
-# 3. Lấy retriever chuẩn hóa
-retriever = vector_db.as_retriever(top_k=5)
-
-# 4. Sử dụng retriever trong RAG pipeline
-rag_chain = (
-    RunnableMap({
-        "context": retriever | (lambda docs: "\n\n".join(d.page_content for d in docs)),
-        "question": RunnablePassthrough()
-    })
-    | prompt_structured
-    | llm
-    | JsonOutputParser()
-)
-\end{lstlisting}
-
-
-\section{Tổng kết RAG sử dụng LangChain}
-
-Trong tài liệu này, chúng ta đã:
-
-\begin{itemize}
-	\item Xác định rõ \textit{First Principle} của RAG: chia nhỏ tài liệu (Chunking), truy hồi ngữ nghĩa (Retrieval) và sinh câu trả lời (Generation).
-	\item Phân tích chi tiết các vấn đề khi tự xây dựng RAG thủ công và giải pháp LangChain cho từng bước:
-
-	\begin{itemize}
-		\item \textbf{Chunking:} dùng \texttt{SemanticChunker} để cắt ngữ nghĩa, giữ metadata.
-		\item \textbf{Retrieval:} dùng \texttt{HuggingFaceEmbeddings} + \texttt{Chroma/FAISS} để tìm đoạn liên quan nhanh và chính xác.
-		\item \textbf{Generation:} dùng \texttt{PromptTemplate}, \texttt{RunnableMap} và \texttt{JsonOutputParser} để đảm bảo định dạng và giảm hallucination.
-	\end{itemize}
-
-	\item Trình bày chi tiết từng module code với context “vấn đề → giải pháp → ví dụ code”, giúp người mới dễ hình dung và tái sử dụng.
-	\item Giới thiệu các kỹ thuật nâng cao:
-	\begin{itemize}
-		\item \textbf{Structured Prompting} với nhiều loại prompt chuyên biệt.
-		\item \textbf{Tích hợp FAISS} để cải thiện tốc độ truy vấn khi số lượng chunk lớn.
-	\end{itemize}
-\end{itemize}
-
-Nhờ sử dụng LangChain, chúng ta đã thu gọn hàng chục hàm rời rạc thành một pipeline mạch lạc, dễ mở rộng và bảo trì. Người đọc có thể dễ dàng thay đổi backend, mô hình embedding/LLM hay template prompt mà không phải viết lại toàn bộ code.
+% \subsubsection*{Tải mô hình embedding (\texttt{load\_embeddings})}
+
+% \textit{Vấn đề:} Cần biến mỗi đoạn văn thành vector để so sánh ngữ nghĩa, đồng thời chọn model embedding phù hợp với ngôn ngữ tiếng Việt.\\
+
+% \textit{Giải pháp:} Dùng \texttt{HuggingFaceEmbeddings} với một mô hình bi‑encoder đã tiền huấn luyện cho tiếng Việt để đảm bảo chất lượng vector tốt.\\
+
+% \begin{lstlisting}[language=Python, caption=Tải embedding model với comment giải thích]
+% def load_embeddings():
+%     # Khởi tạo HuggingFaceEmbeddings:
+%     # - model_name: tên mô hình bi-encoder trên HuggingFace Hub, hỗ trợ tiếng Việt
+%     #   (“bkai-foundation-models/vietnamese-bi-encoder”)
+%     # - embeddings sẽ được dùng để mã hóa các chunk thành vector ngữ nghĩa
+%     return HuggingFaceEmbeddings(
+%         model_name="bkai-foundation-models/vietnamese-bi-encoder"
+%     )
+% \end{lstlisting}
+
+
+% \subsubsection*{Tải và cấu hình LLM (\texttt{load\_llm})}
+
+% \textit{Vấn đề:} Muốn sinh câu trả lời, cần load mô hình causal LM đã huấn luyện sẵn, tối ưu bộ nhớ và gán token để xác thực với HuggingFace.\\
+
+% \noindent\textit{Giải pháp:}
+% \begin{itemize}
+%     \item Sử dụng cấu hình quantization 4-bit (\texttt{BitsAndBytesConfig}) để giảm footprint trên GPU/CPU.
+%     \item Tự động load token từ file \texttt{token.txt} để bảo mật API key.
+%     \item Dùng \texttt{transformers.pipeline} cho task \texttt{"text-generation"}.
+%     \item Bọc pipeline vào \texttt{HuggingFacePipeline} của LangChain để dễ tích hợp với các \texttt{Runnable}.
+% \end{itemize}
+
+% \begin{lstlisting}[language=Python, caption=Tải và cấu hình LLM với comment giải thích]
+% def load_llm(model_name):
+%     # Kiểm tra file token và đọc HuggingFace token để xác thực
+%     token_path = Path("token.txt")
+%     if not token_path.exists():
+%         raise FileNotFoundError("Missing HuggingFace token.txt")
+%     hf_token = token_path.read_text().strip()
+
+%     # Cấu hình cho quantization 4-bit:
+%     # - load_in_4bit: bật chế độ 4-bit
+%     # - bnb_*: các tham số tùy chỉnh cho chất lượng và tốc độ
+%     bnb_config = BitsAndBytesConfig(
+%         load_in_4bit=True,
+%         bnb_4bit_use_double_quant=True,
+%         bnb_4bit_compute_dtype=torch.bfloat16,
+%         bnb_4bit_quant_type="nf4"
+%     )
+
+%     # Load mô hình causal LM đã huấn luyện sẵn:
+%     # - model_name: tên repo trên HuggingFace (ví dụ "google/gemma-2b-it")
+%     # - quantization_config: cấu hình 4-bit ở trên
+%     # - low_cpu_mem_usage: tối ưu bộ nhớ khi load model
+%     # - device_map="auto": tự động phân bổ model giữa CPU/GPU
+%     # - token=hf_token: xác thực truy cập private repo nếu cần
+%     model = AutoModelForCausalLM.from_pretrained(
+%         model_name,
+%         quantization_config=bnb_config,
+%         low_cpu_mem_usage=True,
+%         device_map="auto",
+%         token=hf_token
+%     )
+
+%     # Load tokenizer tương ứng và đặt pad_token trùng eos_token
+%     tokenizer = AutoTokenizer.from_pretrained(model_name)
+%     tokenizer.pad_token = tokenizer.eos_token
+
+%     # Tạo pipeline text-generation:
+%     # - max_new_tokens: giới hạn số token sinh ra
+%     # - pad_token_id: id dùng để padding
+%     # - device_map="auto": phân phối device cuda/cpu/gpu tự động
+%     model_pipeline = pipeline(
+%         "text-generation",
+%         model=model,
+%         tokenizer=tokenizer,
+%         max_new_tokens=512,
+%         pad_token_id=tokenizer.eos_token_id,
+%         device_map="auto"
+%     )
+
+%     # Bọc vào HuggingFacePipeline của LangChain
+%     return HuggingFacePipeline(pipeline=model_pipeline)
+% \end{lstlisting}
+
+
+
+% \subsubsection*{Đọc tài liệu PDF (\texttt{load\_documents})}
+
+% \textit{Vấn đề:} PDF phức tạp, không thể đọc bằng open‑file thông thường; cần thư viện chuyên dụng để trích xuất văn bản.\\
+
+% \noindent \textit{Giải pháp:} Dùng \texttt{PyPDFLoader} của LangChain Community để load từng trang thành document objects và bắt lỗi khi load thất bại.\\
+
+% \begin{lstlisting}[language=Python, caption=Đọc và load nhiều PDF]
+% def load_documents(folder_path):
+%     folder = Path(folder_path.strip().strip('"\''))
+
+%     if not folder.exists():
+%         raise FileNotFoundError(f"Folder not found: {folder}")
+
+%     pdf_files = list(folder.glob("*.pdf"))
+%     if not pdf_files:
+%         raise ValueError(f"No PDF files in folder: {folder}")
+
+%     all_docs, filenames = [], []
+%     for pdf_file in pdf_files:
+%         try:
+%             docs = PyPDFLoader(str(pdf_file)).load()
+%             all_docs.extend(docs)
+%             filenames.append(pdf_file.name)
+%             print(f"✅ Loaded {pdf_file.name} ({len(docs)} pages)")
+%         except Exception as e:
+%             print(f"❌ Failed loading {pdf_file.name}: {e}")
+%     return all_docs, filenames
+% \end{lstlisting}
+
+
+% \subsubsection*{Xây dựng pipeline RAG (\texttt{build\_rag\_chain})}
+
+% \textit{Vấn đề:} Cần kết hợp chunking, lưu vector, truy hồi, prompt và LLM thành một pipeline duy nhất, dễ debug và mở rộng.\\
+
+% \noindent \textit{Giải pháp:}
+% \begin{itemize}
+% 	\item Dùng \texttt{SemanticChunker} chia ngữ nghĩa.
+% 	\item Dùng \texttt{Chroma.from\_documents} để tạo vector store.
+% 	\item Lấy \texttt{retriever = vectordb.as\_retriever()} chuẩn hoá.
+% 	\item Dùng \texttt{RunnableMap} để song song format context và giữ question.
+% 	\item Ghép với \texttt{PromptTemplate} và \texttt{JsonOutputParser} để ra JSON.
+% \end{itemize}
+
+% \begin{lstlisting}[language=Python, caption=Xây dựng RAG chain với LangChain]
+% def build_rag_chain(docs, embeddings, llm):
+%     chunker = SemanticChunker(
+%         embeddings=embeddings,
+%         buffer_size=1,
+%         breakpoint_threshold_type="percentile",
+%         breakpoint_threshold_amount=95,
+%         min_chunk_size=500,
+%         add_start_index=True
+%     )
+
+%     chunks = chunker.split_documents(docs)
+%     vector_db = FAISS.from_documents(chunks, embedding=embeddings)
+%     retriever = vector_db.as_retriever(top_k=5)
+
+%     # Prompt mới: chỉ yêu cầu trả lời câu hỏi ngắn gọn không định dạng JSON
+%     prompt = PromptTemplate.from_template("""
+%     You are an assistant for question-answering tasks. Use the following pieces of
+%     retrieved context to answer the question. If you don't know the answer, just say that
+%     you don't know. Use three sentences maximum and keep the answer concise.
+%     Question: {question}
+%     Context: {context}
+%     Answer:
+%     """)
+
+%     rag_chain = (
+%         RunnableMap({
+%             'context': retriever | (lambda docs: "\n\n".join(d.page_content for d in docs)),
+%             'question': RunnablePassthrough()
+%         })
+%         | prompt
+%         | llm
+%         | StrOutputParser()
+%     )
+
+%     return rag_chain, len(chunks)
+% \end{lstlisting}
+
+
+% \subsubsection*{Khởi chạy ứng dụng (\texttt{main})}
+
+% \textit{Vấn đề:} Cần đồng bộ các bước load, build pipeline và truy vấn — đồng thời hiển thị thời gian và kết quả.\\
+% \noindent \textit{Giải pháp:} Viết hàm \texttt{main()} thứ tự rõ ràng: lấy device, load embeddings/LLM, load docs, build chain, invoke question, in ra kết quả.\\
+
+% \begin{lstlisting}[language=Python, caption=Hàm chính khởi chạy RAG App]
+% def main():
+%     get_device()
+%     embeddings = load_embeddings()
+%     llm = load_llm("google/gemma-2b-it")
+%     docs, filenames = load_documents("pdf_folder")
+%     rag_chain, num_chunks = build_rag_chain(docs, embeddings, llm)
+
+%     print(f"Ready: {len(filenames)} files, {num_chunks} chunks")
+
+%     while True:
+%         user_input = input("\nYour question (type 'exit' to quit): ")
+%         if user_input.lower() == "exit":
+%             break
+
+%         print("\nGenerating answer...")
+%         start = time.time()
+%         response = rag_chain.invoke(user_input)
+%         print("OUTPUT:", response)
+%         print(f"⏱️ Time taken: {time.time() - start:.2f}s")
+% \end{lstlisting}
+
+% \section{Cải Thiện Mô hình RAG}
+% Sau khi đã có mô hình RAG cơ bản, trong phần này chúng ta sẽ tập trung vào các cải thiện chính sau:
+% \begin{itemizize}
+% \item Cải thiện Retrieval 1: Tăng tốc độ truy vấn bằng FAISS
+% \item Generation: Cải thiện format Output thành JSON. Đảm bảo Output có cấu trúc nhất quán và dễ dàng tái sử dụng.
+% \end{itemizize}
+
+% \subsection{Prompting có cấu trúc (Structured Prompting)}
+
+% \textit{Vấn đề:} Khi ghép context và câu hỏi vào prompt thủ công, dễ bị thiếu nhất quán, LLM trả lời lạc đề hoặc không theo định dạng mong muốn.\\
+
+% \noindent \textit{Giải pháp:} Sử dụng \texttt{PromptTemplate} để định nghĩa sẵn cấu trúc prompt, bảo đảm mọi truy vấn đều theo cùng một khung mẫu.\\
+
+% \begin{lstlisting}[language=Python, caption=Sử dụng PromptTemplate cho Structured Prompting]
+% from langchain_core.prompts import PromptTemplate
+
+% # Định nghĩa mẫu prompt có cấu trúc
+% prompt_structured = PromptTemplate.from_template(
+%     prompt_text = """
+%         Bạn là một trợ lý chuyên thực hiện các nhiệm vụ trả lời câu hỏi.
+%         Hãy sử dụng các phần nội dung được truy xuất bên dưới để trả lời câu hỏi.
+%         Nếu bạn không biết câu trả lời, chỉ cần nói rằng bạn không biết.
+
+%         Yêu cầu: Hãy trả về phản hồi dưới dạng một đối tượng JSON hợp lệ, với đúng ba khóa: "context", "question" và "answer". Chỉ xuất ra đối tượng JSON, không thêm bất kỳ nội dung nào khác.
+
+%         Ví dụ về đầu ra JSON:
+%         \{\{
+%             "context": "OOP là một mô hình lập trình dựa trên khái niệm đối tượng.",
+%             "question": "OOP là gì?",
+%             "answer": "OOP là viết tắt của Lập trình hướng đối tượng, một mô hình tổ chức thiết kế phần mềm xung quanh dữ liệu hoặc đối tượng, thay vì các hàm và logic."
+%         \}\}
+
+%         Context: {context}
+%         Question: {question}
+%         Answer:
+%     """ #? \{\} mean Variable. Use \{{ }\} "escape" the curly braces in your example JSON so that LangChain treats them as literal text,
+
+%     prompt_template = PromptTemplate.from_template(prompt_text)
+% )
+% \end{lstlisting}
+
+
+% \subsection{Các kiểu Prompt khác nhau}
+
+% \textit{Vấn đề:} Một prompt chung không phù hợp cho mọi loại truy vấn (tóm tắt, dịch, phân tích sentiment…).\\
+
+% \noindent \textit{Giải pháp:} Xây dựng các loại prompt tùy theo mục đích, ví dụ:
+% \begin{itemize}
+%     \item \textbf{QA Prompt:} dành cho hỏi–đáp thông tin.
+%     \item \textbf{Summarization Prompt:} dành cho tóm tắt nội dung, chỉ yêu cầu tóm gọn ý chính.
+%     \item \textbf{Translation Prompt:} dành cho dịch văn bản, yêu cầu giữ nguyên ngữ điệu.
+%     \item \textbf{Sentiment Prompt:} dành cho phân tích cảm xúc, trả về Positive/Negative.
+% \end{itemize}
+
+% \noindent
+% Mỗi loại prompt dùng một \texttt{PromptTemplate} riêng, đảm bảo LLM hiểu đúng ngữ cảnh và mục đích của tác vụ.
+
+% \subsection{Cải tiến tốc độ truy vấn sử dụng FAISS}
+
+% \subsubsection*{Lợi ích khi sử dụng FAISS:}
+
+% \noindent\textit{Vấn đề:} Khi kho vector lớn (hàng trăm ngàn chunk), truy vấn bằng Chroma/Weaviate có thể chậm do overhead kết nối mạng hoặc cơ chế indirection.\\
+
+% \textbf{Lợi ích:}
+% \begin{itemize}
+%     \item \textbf{Tốc độ cao:} FAISS là thư viện C++ tối ưu cho nearest neighbor search, truy vấn vector in-memory rất nhanh.
+%     \item \textbf{Tiêu thụ tài nguyên thấp:} Chạy local, không cần server riêng, giảm độ trễ.
+%     \item \textbf{Module hóa dễ dàng:} Có thể thay thế backend chỉ với một dòng code thay vì tái cấu trúc toàn bộ pipeline.
+% \end{itemize}
+
+
+% \subsubsection*{Cách tích hợp FAISS với LangChain:}
+
+% \noindent \textit{Giải pháp:} Thay thế \texttt{Chroma} bằng \texttt{FAISS} thông qua abstraction \texttt{VectorStore}:
+
+% \begin{lstlisting}[language=Python, caption=Tích hợp FAISS với LangChain]
+% from langchain.vectorstores import FAISS
+% from langchain_huggingface.embeddings import HuggingFaceEmbeddings
+
+% # 1. Tạo embeddings như trước
+% embeddings = HuggingFaceEmbeddings(model_name="bkai-foundation-models/vietnamese-bi-encoder")
+
+% # 2. Khởi tạo FAISS từ list of documents
+% vector_db = FAISS.from_documents(
+%     documents=chunks,
+%     embedding=embeddings
+% )
+
+% # 3. Lấy retriever chuẩn hóa
+% retriever = vector_db.as_retriever(top_k=5)
+
+% # 4. Sử dụng retriever trong RAG pipeline
+% rag_chain = (
+%     RunnableMap({
+%         "context": retriever | (lambda docs: "\n\n".join(d.page_content for d in docs)),
+%         "question": RunnablePassthrough()
+%     })
+%     | prompt_structured
+%     | llm
+%     | JsonOutputParser()
+% )
+% \end{lstlisting}
+
+
+% \section{Tổng kết RAG sử dụng LangChain}
+
+% Trong tài liệu này, chúng ta đã:
+
+% \begin{itemize}
+% 	\item Xác định rõ \textit{First Principle} của RAG: chia nhỏ tài liệu (Chunking), truy hồi ngữ nghĩa (Retrieval) và sinh câu trả lời (Generation).
+% 	\item Phân tích chi tiết các vấn đề khi tự xây dựng RAG thủ công và giải pháp LangChain cho từng bước:
+
+% 	\begin{itemize}
+% 		\item \textbf{Chunking:} dùng \texttt{SemanticChunker} để cắt ngữ nghĩa, giữ metadata.
+% 		\item \textbf{Retrieval:} dùng \texttt{HuggingFaceEmbeddings} + \texttt{Chroma/FAISS} để tìm đoạn liên quan nhanh và chính xác.
+% 		\item \textbf{Generation:} dùng \texttt{PromptTemplate}, \texttt{RunnableMap} và \texttt{JsonOutputParser} để đảm bảo định dạng và giảm hallucination.
+% 	\end{itemize}
+
+% 	\item Trình bày chi tiết từng module code với context “vấn đề → giải pháp → ví dụ code”, giúp người mới dễ hình dung và tái sử dụng.
+% 	\item Giới thiệu các kỹ thuật nâng cao:
+% 	\begin{itemize}
+% 		\item \textbf{Structured Prompting} với nhiều loại prompt chuyên biệt.
+% 		\item \textbf{Tích hợp FAISS} để cải thiện tốc độ truy vấn khi số lượng chunk lớn.
+% 	\end{itemize}
+% \end{itemize}
+
 
 % Appendix Section
 \clearpage

@@ -15,9 +15,4 @@
 \contentsline {subsubsection}{\numberline {2.2}Retrieval (Truy hồi thông tin)}{10}{subsubsection.4.2.2}%
 \contentsline {subsubsection}{\numberline {2.3}Generation (Sinh câu trả lời)}{11}{subsubsection.4.2.3}%
 \contentsline {subsection}{\numberline {3}Quy trình thực hiện từng Module}{11}{subsection.4.3}%
-\contentsline {section}{\numberline {5}Cải Thiện Mô hình RAG}{15}{section.5}%
-\contentsline {subsection}{\numberline {1}Prompting có cấu trúc (Structured Prompting)}{15}{subsection.5.1}%
-\contentsline {subsection}{\numberline {2}Các kiểu Prompt khác nhau}{16}{subsection.5.2}%
-\contentsline {subsection}{\numberline {3}Cải tiến tốc độ truy vấn sử dụng FAISS}{16}{subsection.5.3}%
-\contentsline {section}{\numberline {6}Tổng kết RAG sử dụng LangChain}{17}{section.6}%
-\contentsline {section}{\numberline {A}Phụ lục giải thích thuật ngữ}{19}{appendix.A}%
+\contentsline {section}{\numberline {A}Phụ lục giải thích thuật ngữ}{12}{appendix.A}%
