@@ -102,3 +102,6 @@ giản hóa và tối ưu hóa việc xây dựng phần mềm.
         "question": "OOP là gì?",
         "answer": "OOP là viết tắt của Lập trình hướng đối tượng, một mô hình tổ chức thiết kế phần mềm xung quanh dữ liệu hoặc đối tượng, thay vì các hàm và logic."
     }
+
+
+----

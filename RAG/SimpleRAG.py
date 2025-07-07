@@ -5,15 +5,13 @@ from pathlib import Path
 from transformers import (
     AutoModelForCausalLM,
     AutoTokenizer,
-    BitsAndBytesConfig,
-    pipeline,
 )
+from transformers.pipelines import pipeline
+from transformers.utils.quantization_config import BitsAndBytesConfig
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_huggingface.embeddings import HuggingFaceEmbeddings
 from langchain_experimental.text_splitter import SemanticChunker
-from langchain_chroma import Chroma
 from langchain_huggingface.llms import HuggingFacePipeline
-from langchain import hub
 from langchain_core.output_parsers import StrOutputParser, JsonOutputParser
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.runnables import RunnableParallel, RunnablePassthrough, RunnableLambda, RunnableMap
