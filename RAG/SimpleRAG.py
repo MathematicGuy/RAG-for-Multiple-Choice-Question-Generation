@@ -1,6 +1,7 @@
 import os
 import time
 import torch
+import json
 from pathlib import Path
 from transformers import (
     AutoModelForCausalLM,
@@ -193,6 +194,7 @@ def main():
     print(f"⏱️ Loading Time: {time.time() - start:.2f}s")
 
     # while True:
+    json_outputs = []
     for i in range(5): # Check consistency
         #     user_input = input("\nYour question (type 'exit' to quit): ")
         #     if user_input.lower() == "exit":
@@ -203,6 +205,9 @@ def main():
         start = time.time()
         # response = rag_chain.invoke('OOP là gì ?')
         response = rag_chain.invoke("OOP là gì ?")
+        start = response.rfind("{")
+        end = response.rfind("}")
+        json_outputs.append(response[start:end+1].strip())
 
         # try:
         #     print('dsjhfsdjfsdjfhdshfsdkhfkjds--------')
@@ -217,9 +222,16 @@ def main():
 
         # except Exception as error:
         #     print(f"Error: {error}")
-        print(f"JSON OUTPUT: {response}")
 
-        print(f"⏱️ Time taken: {time.time() - start:.2f}s")
+        print(f"JSON OUTPUT: {response}")
+        print(f"Time taken: {time.time() - start:.2f}s")
+
+    for json_output in json_outputs:
+        print(json_output)
+
+    for json_output in json_outputs:
+        data = json.loads(json_output)
+        print(json.dumps(data, ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":
