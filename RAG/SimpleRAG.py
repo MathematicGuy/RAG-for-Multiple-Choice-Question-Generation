@@ -37,7 +37,7 @@ def load_embeddings():
 
 
 def load_llm(model_name):
-    token_path = Path("api_key/hugging_face_token.txt")
+    token_path = Path("./api_key/hugging_face_token.txt")
     if not token_path.exists():
         raise FileNotFoundError("Missing HuggingFace token.txt")
 
