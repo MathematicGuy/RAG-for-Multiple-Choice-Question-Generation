@@ -8,12 +8,16 @@
 \contentsline {subsection}{\numberline {2}Vấn đề tồn tại khi xây dựng mô hình RAG (không dùng framework)}{4}{subsection.3.2}%
 \contentsline {subsection}{\numberline {3}Giải pháp mà LangChain đưa ra}{5}{subsection.3.3}%
 \contentsline {subsection}{\numberline {4}Giải thích các syntax cơ bản của LangChain}{6}{subsection.3.4}%
-\contentsline {section}{\numberline {4}Xây dựng mô hình RAG sử dụng LangChain}{9}{section.4}%
-\contentsline {section}{\numberline {5}Demo kết quả mô hình RAG cơ bản}{10}{section.5}%
-\contentsline {section}{\numberline {6}Cải Thiện Mô hình RAG}{10}{section.6}%
-\contentsline {subsection}{\numberline {1}Prompting có cấu trúc (Structured Prompting)}{10}{subsection.6.1}%
-\contentsline {subsection}{\numberline {2}Các kiểu Prompt khác nhau}{10}{subsection.6.2}%
-\contentsline {subsection}{\numberline {3}Cải tiến tốc độ truy vấn sử dụng FAISS}{10}{subsection.6.3}%
-\contentsline {section}{\numberline {7}Tổng kết}{10}{section.7}%
-\contentsline {section}{\numberline {8}Kết Thúc}{10}{section.8}%
-\contentsline {section}{\numberline {A}Phụ lục giải thích thuật ngữ}{11}{appendix.A}%
+\contentsline {section}{\numberline {4}Xây dựng mô hình RAG sử dụng LangChain}{10}{section.4}%
+\contentsline {subsection}{\numberline {1}Xác định vấn đề cơ bản}{10}{subsection.4.1}%
+\contentsline {subsection}{\numberline {2}Phân tích các vấn đề của từng thành phần của RAG}{10}{subsection.4.2}%
+\contentsline {subsubsection}{\numberline {2.1}Chunking (Chia nhỏ văn bản)}{10}{subsubsection.4.2.1}%
+\contentsline {subsubsection}{\numberline {2.2}Retrieval (Truy hồi thông tin)}{10}{subsubsection.4.2.2}%
+\contentsline {subsubsection}{\numberline {2.3}Generation (Sinh câu trả lời)}{11}{subsubsection.4.2.3}%
+\contentsline {subsection}{\numberline {3}Quy trình thực hiện từng Module}{11}{subsection.4.3}%
+\contentsline {section}{\numberline {5}Cải Thiện Mô hình RAG}{15}{section.5}%
+\contentsline {subsection}{\numberline {1}Prompting có cấu trúc (Structured Prompting)}{15}{subsection.5.1}%
+\contentsline {subsection}{\numberline {2}Các kiểu Prompt khác nhau}{16}{subsection.5.2}%
+\contentsline {subsection}{\numberline {3}Cải tiến tốc độ truy vấn sử dụng FAISS}{16}{subsection.5.3}%
+\contentsline {section}{\numberline {6}Tổng kết RAG sử dụng LangChain}{17}{section.6}%
+\contentsline {section}{\numberline {A}Phụ lục giải thích thuật ngữ}{19}{appendix.A}%
