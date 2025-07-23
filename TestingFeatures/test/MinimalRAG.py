@@ -1,6 +1,7 @@
 import os
 import time
 import torch
+import json
 from pathlib import Path
 from transformers import (
     AutoModelForCausalLM,
@@ -17,29 +18,12 @@ from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.runnables import RunnableParallel, RunnablePassthrough, RunnableLambda, RunnableMap
 from langchain_core.prompts import PromptTemplate
 import textwrap # remove indentation from the JSON block
-from langchain_community.vectorstores import FAISS
+from langchain.vectorstores import FAISS
 
 #? OOP
 from langchain_core.documents import Document
 from typing_extensions import List, TypedDict
-from langsmith import traceable
 
-#? Call API KEYS
-token_path = Path("api_key/hugging_face_token.txt")
-if not token_path.exists():
-    raise FileNotFoundError("Missing HuggingFace token.txt")
-
-with open('api_key/langsmith_api_key.txt', 'r') as f:
-    langsmith_key = f.read()
-
-
-#? SET UP LANGSMITH
-LANGSMITH_TRACING=True
-LANGSMITH_ENDPOINT="https://api.smith.langchain.com"
-LANGSMITH_API_KEY=langsmith_key
-LANGSMITH_PROJECT="rag-aio-project"
-with token_path.open("r") as f:
-    HUGGING_FACE_API_KEY = f.read().strip() # read token and strip blank spaces
 
 def get_device():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -56,6 +40,9 @@ def load_llm(model_name):
     if not token_path.exists():
         raise FileNotFoundError("Missing HuggingFace token.txt")
 
+    with token_path.open("r") as f:
+        hf_token = f.read().strip()
+
     bnb_config = BitsAndBytesConfig(
         load_in_4bit=True,
         bnb_4bit_use_double_quant=True,
@@ -68,7 +55,7 @@ def load_llm(model_name):
         quantization_config=bnb_config,
         low_cpu_mem_usage=True,
         device_map="auto",
-        token=HUGGING_FACE_API_KEY
+        token=hf_token
     )
 
     tokenizer = AutoTokenizer.from_pretrained(model_name)
@@ -109,10 +96,6 @@ def load_documents(folder_path):
     return all_docs, filenames
 
 
-class State(TypedDict):
-    question: str
-    context: List[Document]
-    answer: str
 
 def build_rag_chain(docs, embeddings, llm):
     chunker = SemanticChunker(
@@ -154,24 +137,6 @@ def build_rag_chain(docs, embeddings, llm):
     def format_docs(docs):
         return "\n\n".join(doc.page_content for doc in docs)
 
-    # rag_chain = (
-    #     #? { } -> Syntax for RunnableMap.
-    #     #? retriever is the retrieved information. format_docs is function to format the retrieved information.
-    #     RunnableParallel({'context': retriever | format_docs, 'question': RunnablePassthrough()})
-    #     | prompt
-    #     | llm
-    #     | StrOutputParser()
-    # )
-
-    # return_json_result = RunnableLambda(lambda result: {
-    #     "context": result["context"],
-    #     "question": result["question"],
-    #     "answer": result
-    # })
-
-    #? smart JSON parser help to fix invalid or malformed (i.e not json) outputs from a model automatically by using the LLM itself
-    #? basically if the output is broken (e.g. missing commas, extra test) -> fix it using the LLM then parse
-    # json_parser = JsonOutputParser()
 
     rag_chain = (
         RunnableMap({
@@ -183,12 +148,10 @@ def build_rag_chain(docs, embeddings, llm):
         # Receives the formatted prompt and outputs a string, which should be in JSON format.
         | llm
         # Receives the string from the LLM and automatically parses it into a Python dictionary.
-        # | json_parser
     )
     return rag_chain, len(chunks)
 
 
-@traceable
 def main():
     get_device()
     embeddings = load_embeddings()
@@ -198,6 +161,7 @@ def main():
     MODEL_NAME= "google/gemma-2b-it"
     # MODEL_NAME = "lmsys/vicuna-7b-v1.5"
     llm = load_llm(MODEL_NAME)
+
     folder_path = "pdf_folder"  # Replace with your path
     start = time.time()
     docs, filenames = load_documents(folder_path)
@@ -206,35 +170,11 @@ def main():
     print(f"\nReady: {len(filenames)} files, {num_chunks} chunks")
     print(f"⏱️ Loading Time: {time.time() - start:.2f}s")
 
-    # while True:
-    #     user_input = input("\nYour question (type 'exit' to quit): ")
-    #     if user_input.lower() == "exit":
-    #         break
-
-    #     print("\nGenerating answer...")
-
-    start = time.time()
-    response = rag_chain.invoke("Inheritant trong OOP có nghĩa là gì ?")
-    # response = rag_chain.invoke("OOP là gì ?")
-    #? Lỗi: mất format khi câu hỏi quá khó
-
-        # try:
-        #     # Use dictionary key access instead of attribute access
-        #     print(f"\nContext: {response['context']}")
-        #     print('------------------------------------')
-        #     print(f"Question: {response['question']}")
-        #     print('------------------------------------')
-        #     print(f"JSON OUTPUT: {response['answer']}")
-        #     print("Done")
-
-        #     with open("output.txt", "a", encoding="utf-8") as f:
-        #         f.write(str(response) + "\n")
-
-        # except Exception as error:
-        # print(f"Error: {error}")
-
-    print(f"JSON OUTPUT: {response}")
-    print(f"⏱️ Time taken: {time.time() - start:.2f}s")
+    for i in range(5): # Check consistency
+        start = time.time()
+        response = rag_chain.invoke("OOP là gì ?")
+        print(f"JSON OUTPUT: {response}")
+        print(f"Time taken: {time.time() - start:.2f}s")
 
 
 if __name__ == "__main__":

@@ -96,10 +96,10 @@ def load_documents(folder_path):
     return all_docs, filenames
 
 
-class State(TypedDict):
-    question: str
-    context: List[Document]
-    answer: str
+# class State(TypedDict):
+#     question: str
+#     context: List[Document]
+#     answer: str
 
 def build_rag_chain(docs, embeddings, llm):
     chunker = SemanticChunker(
