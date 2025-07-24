@@ -1,1 +1,1 @@
-cut
+"1123".isdigit
