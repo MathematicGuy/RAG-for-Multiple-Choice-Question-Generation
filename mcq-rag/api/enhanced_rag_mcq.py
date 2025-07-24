@@ -219,6 +219,7 @@ class QualityValidator:
     def calculate_quality_score(self, mcq: MCQQuestion) -> float:
         """Calculate quality score from 0 to 100"""
         is_valid, issues = self.validate_mcq(mcq)
+        print("MCQ Output Quality Score:", issues)
 
         if not is_valid:
             return 0.0
@@ -382,6 +383,7 @@ class EnhancedRAGMCQGenerator:
         # Vietnamese typically has ~0.75 tokens per character
         return int(len(text) * 0.75)
 
+     #? Parse Json String
     def _extract_json_from_response(self, response: str) -> dict:
         """Extract JSON from LLM response with multiple fallback strategies"""
         import re
@@ -458,7 +460,7 @@ class EnhancedRAGMCQGenerator:
 
     def _load_llm(self) -> HuggingFacePipeline:
         """Load and configure the LLM"""
-        token_path = Path("./api_key/hugging_face_token.txt")
+        token_path = Path("./tokens/hugging_face_token.txt")
         if token_path.exists():
             with token_path.open("r") as f:
                 hf_token = f.read().strip()
@@ -658,7 +660,7 @@ class EnhancedRAGMCQGenerator:
 
     def generate_batch(self,
                       topics: List[str],
-                      count_per_topic: int = 5,
+                      question_per_topic: int = 5,
                       difficulties: Optional[List[DifficultyLevel]] = None,
                       question_types: Optional[List[QuestionType]] = None) -> List[MCQQuestion]:
         """Generate batch of MCQs"""
@@ -670,14 +672,14 @@ class EnhancedRAGMCQGenerator:
             question_types = [QuestionType.DEFINITION, QuestionType.APPLICATION]
 
         mcqs = []
-        total_questions = len(topics) * count_per_topic
+        total_questions = len(topics) * question_per_topic
 
         print(f"🎯 Generating {total_questions} MCQs...")
 
         for i, topic in enumerate(topics):
             print(f"📝 Processing topic {i+1}/{len(topics)}: {topic}")
 
-            for j in range(count_per_topic):
+            for j in range(question_per_topic):
                 try:
                     # Cycle through difficulties and question types
                     difficulty = difficulties[j % len(difficulties)]
@@ -686,7 +688,7 @@ class EnhancedRAGMCQGenerator:
                     mcq = self.generate_mcq(topic, difficulty, question_type)
                     mcqs.append(mcq)
 
-                    print(f"  ✅ Generated question {j+1}/{count_per_topic} "
+                    print(f"  ✅ Generated question {j+1}/{question_per_topic} "
                           f"(Quality: {mcq.confidence_score:.1f})")
 
                 except Exception as e:
@@ -780,7 +782,7 @@ def main():
             print(f"📚 System ready with {len(filenames)} files and {num_chunks} chunks")
 
             # Generate sample MCQs
-            topics = ["Object Oriented Programming", "Malware Reverse Engineering", "IoT"]
+            topics = ["Object Oriented Programming", "Malware Reverse Engineering"]
 
             # Single question generation
             # print("\n🎯 Generating single MCQ...")
@@ -796,9 +798,11 @@ def main():
             # Batch generation
             n_question = 2
             print("\n🎯 Generating batch MCQs...")
+
+            #? MAIN OUTPUT: Multiple Choice Question
             mcqs = generator.generate_batch(
                 topics=topics,
-                count_per_topic=n_question
+                question_per_topic=n_question
             )
 
             # Export results
