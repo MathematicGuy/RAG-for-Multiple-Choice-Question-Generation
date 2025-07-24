@@ -1,6 +1,6 @@
 # RAG for multiple choice questions generation
 
-This project aims to build a RAG model for generating MCQ (multiple choice questions)
+This project aims to build a RAG model for generating MCQ (multiple choice questions) from a PDF file
 
 
 # Set Up LangSmith for debugging
