@@ -102,30 +102,33 @@ class PromptTemplateManager:
 
     def _create_base_template(self) -> str:
         """Create the base template used by all question types"""
-        return """Hãy tạo 1 câu hỏi trắc nghiệm dựa trên nội dung sau đây.
+        return """
+            Hãy tạo 1 câu hỏi trắc nghiệm dựa trên nội dung sau đây.
 
-Nội dung: {context}
+            Nội dung: {context}
+            Chủ đề: {topic}
+            Mức độ: {difficulty}
+            Loại câu hỏi: {question_type}
 
-Chủ đề: {topic}
-Mức độ: {difficulty}
-Loại câu hỏi: {question_type}
+            QUAN TRỌNG: Chỉ trả về JSON hợp lệ, không có text bổ sung, luôn trả lời bằng tiếng việt:
 
-QUAN TRỌNG: Chỉ trả về JSON hợp lệ, không có text bổ sung:
+            {{
+                "question": "Câu hỏi rõ ràng về {topic}",
+                "options": {{
+                    "A": "Đáp án A",
+                    "B": "Đáp án B",
+                    "C": "Đáp án C",
+                    "D": "Đáp án D"
+                }},
+                "correct_answer": "A",
+                "explanation": "Giải thích tại sao đáp án A đúng",
+                "topic": "{topic}",
+                "difficulty": "{difficulty}",
+                "question_type": "{question_type}"
+            }}
 
-{{
-    "question": "Câu hỏi rõ ràng về {topic}",
-    "options": {{
-        "A": "Đáp án A",
-        "B": "Đáp án B",
-        "C": "Đáp án C",
-        "D": "Đáp án D"
-    }},
-    "correct_answer": "A",
-    "explanation": "Giải thích tại sao đáp án A đúng",
-    "topic": "{topic}",
-    "difficulty": "{difficulty}",
-    "question_type": "{question_type}"
-}}"""
+            Trả lời:
+        """
 
     def _create_question_specific_instruction(self, question_type: str) -> str:
         """Create specific instructions for each question type"""
@@ -571,7 +574,9 @@ class EnhancedRAGMCQGenerator:
 
         # Get appropriate prompt template
         template_text = self.prompt_manager.get_template(question_type)
+        template_infor_debug = self.prompt_manager.get_template_info()
         prompt_template = PromptTemplate.from_template(template_text)
+        print(f"Template Structure Info: \n {template_infor_debug}")
 
         # Generate question with length checking
         prompt_input = {
@@ -620,7 +625,7 @@ class EnhancedRAGMCQGenerator:
 
         # Parse JSON response
         try:
-            print(f"🔍 Parsing response (first 300 chars): {response[:300]}...")
+            print(f"🔍 Parsing response (first 300 chars): {response}...")
             response_data = self._extract_json_from_response(response)
             print(f"✅ Successfully parsed JSON response")
 
@@ -745,6 +750,7 @@ def main():
     """Main function demonstrating the enhanced RAG MCQ system"""
     print("🚀 Starting Enhanced RAG MCQ Generation System")
 
+
     # Test prompt templates first
     print("\n🧪 Testing prompt templates...")
     debug_prompt_templates()
@@ -768,28 +774,31 @@ def main():
         try:
             docs, filenames = generator.load_documents(folder_path)
             num_chunks = generator.build_vector_database(docs)
+            start = time.time() #? Calc generation time
 
+            print(f"⏱️ Loading Time: {time.time() - start:.2f}s") #? Loading document time
             print(f"📚 System ready with {len(filenames)} files and {num_chunks} chunks")
 
             # Generate sample MCQs
-            topics = ["Statistics"]
+            topics = ["Object Oriented Programming", "Malware Reverse Engineering", "IoT"]
 
             # Single question generation
-            print("\n🎯 Generating single MCQ...")
-            mcq = generator.generate_mcq(
-                topic=topics[0],
-                difficulty=DifficultyLevel.MEDIUM,
-                question_type=QuestionType.DEFINITION
-            )
+            # print("\n🎯 Generating single MCQ...")
+            # mcq = generator.generate_mcq(
+            #     topic=topics[0],
+            #     difficulty=DifficultyLevel.MEDIUM,
+            #     question_type=QuestionType.DEFINITION
+            # )
 
-            print(f"Question: {mcq.question}")
-            print(f"Quality Score: {mcq.confidence_score:.1f}")
+            # print(f"Question: {mcq.question}")
+            # print(f"Quality Score: {mcq.confidence_score:.1f}")
 
             # Batch generation
+            n_question = 2
             print("\n🎯 Generating batch MCQs...")
             mcqs = generator.generate_batch(
                 topics=topics,
-                count_per_topic=2
+                count_per_topic=n_question
             )
 
             # Export results
@@ -797,6 +806,7 @@ def main():
             generator.export_mcqs(mcqs, output_path)
 
             # Quality summary
+            print(f"Average mcq generation time taken: {((time.time() - start)/n_question)/60:.2f} min")
             quality_scores = [mcq.confidence_score for mcq in mcqs]
             print(f"\n📊 Quality Summary:")
             print(f"Average Quality: {np.mean(quality_scores):.1f}")
