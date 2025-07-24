@@ -25,8 +25,10 @@ from langchain_huggingface.llms import HuggingFacePipeline
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.runnables import RunnableParallel, RunnablePassthrough
 from langchain_core.prompts import PromptTemplate
-from langchain.vectorstores import FAISS
+from langchain_community.vectorstores import FAISS
+
 from langchain_core.documents import Document
+from unsloth import FastLanguageModel
 
 # Transformers imports
 from transformers import (
@@ -95,70 +97,83 @@ class PromptTemplateManager:
     """Manages different prompt templates for various question types"""
 
     def __init__(self):
+        self.base_template = self._create_base_template()
         self.templates = self._initialize_templates()
 
-    def _initialize_templates(self) -> Dict[str, str]:
-        """Initialize prompt templates for different question types"""
-        return {
-            "base": """
-Bạn là một chuyên gia giáo dục và thiết kế câu hỏi. Nhiệm vụ của bạn là tạo ra một câu hỏi trắc nghiệm chất lượng cao từ nội dung được cung cấp.
-
-Yêu cầu:
-1. Tạo một câu hỏi rõ ràng, không mơ hồ
-2. Cung cấp đúng 4 lựa chọn (A, B, C, D)
-3. Chỉ có một đáp án đúng
-4. Các phương án sai phải hợp lý nhưng rõ ràng là sai
-5. Bao gồm giải thích cho đáp án đúng
-6. Xác định mức độ khó và chủ đề
+    def _create_base_template(self) -> str:
+        """Create the base template used by all question types"""
+        return """Hãy tạo 1 câu hỏi trắc nghiệm dựa trên nội dung sau đây.
 
 Nội dung: {context}
-Chủ đề tập trung: {topic}
-Mức độ khó: {difficulty}
+
+Chủ đề: {topic}
+Mức độ: {difficulty}
 Loại câu hỏi: {question_type}
 
-Trả về chỉ dưới dạng JSON hợp lệ:
+QUAN TRỌNG: Chỉ trả về JSON hợp lệ, không có text bổ sung:
+
 {{
-    "question": "Câu hỏi của bạn",
+    "question": "Câu hỏi rõ ràng về {topic}",
     "options": {{
-        "A": "Lựa chọn A",
-        "B": "Lựa chọn B",
-        "C": "Lựa chọn C",
-        "D": "Lựa chọn D"
+        "A": "Đáp án A",
+        "B": "Đáp án B",
+        "C": "Đáp án C",
+        "D": "Đáp án D"
     }},
     "correct_answer": "A",
-    "explanation": "Giải thích chi tiết",
+    "explanation": "Giải thích tại sao đáp án A đúng",
     "topic": "{topic}",
     "difficulty": "{difficulty}",
     "question_type": "{question_type}"
-}}
-""",
+}}"""
 
-            "definition": """
-Tạo câu hỏi trắc nghiệm kiểm tra hiểu biết về định nghĩa thuật ngữ.
-Tập trung vào định nghĩa chính xác và những hiểu lầm phổ biến.
-
-{base_template}
-""",
-
-            "application": """
-Tạo câu hỏi trắc nghiệm dựa trên tình huống thực tế yêu cầu áp dụng khái niệm để giải quyết vấn đề.
-Bao gồm các tình huống thực tế nơi khái niệm được sử dụng.
-
-{base_template}
-""",
-
-            "analysis": """
-Thiết kế câu hỏi yêu cầu phân tích code, sơ đồ hoặc các tình huống phức tạp.
-Kiểm tra hiểu biết sâu sắc và tư duy phản biện.
-
-{base_template}
-"""
+    def _create_question_specific_instruction(self, question_type: str) -> str:
+        """Create specific instructions for each question type"""
+        instructions = {
+            "definition": "Tạo câu hỏi định nghĩa thuật ngữ. Tập trung vào định nghĩa chính xác.",
+            "application": "Tạo câu hỏi ứng dụng thực tế. Bao gồm tình huống cụ thể.",
+            "analysis": "Tạo câu hỏi phân tích code/sơ đồ. Kiểm tra tư duy phản biện.",
+            "comparison": "Tạo câu hỏi so sánh khái niệm. Tập trung vào điểm khác biệt.",
+            "evaluation": "Tạo câu hỏi đánh giá phương pháp. Yêu cầu quyết định dựa trên tiêu chí."
         }
+        return instructions.get(question_type, "Tạo câu hỏi chất lượng cao.")
+
+    def _initialize_templates(self) -> Dict[str, str]:
+        """Initialize all templates using the base template"""
+        templates = {"base": self.base_template}
+
+        # Create shorter, more direct templates for each question type
+        instructions = {
+            "definition": "Tạo câu hỏi định nghĩa thuật ngữ.",
+            "application": "Tạo câu hỏi ứng dụng thực tế.",
+            "analysis": "Tạo câu hỏi phân tích code/sơ đồ.",
+            "comparison": "Tạo câu hỏi so sánh khái niệm.",
+            "evaluation": "Tạo câu hỏi đánh giá phương pháp."
+        }
+
+        # Add specific templates for each question type
+        for question_type in QuestionType:
+            instruction = instructions.get(question_type.value, "Tạo câu hỏi chất lượng cao.")
+            templates[question_type.value] = f"{instruction}\n\n{self.base_template}"
+
+        return templates
 
     def get_template(self, question_type: QuestionType = QuestionType.DEFINITION) -> str:
         """Get prompt template for specific question type"""
         return self.templates.get(question_type.value, self.templates["base"])
 
+    def update_base_template(self, new_base_template: str):
+        """Update the base template and regenerate all templates"""
+        self.base_template = new_base_template
+        self.templates = self._initialize_templates()
+        print("✅ Base template updated and all templates regenerated")
+
+    def get_template_info(self) -> Dict[str, int]:
+        """Get information about all templates (for debugging)"""
+        return {
+            template_type: len(template)
+            for template_type, template in self.templates.items()
+        }
 
 class QualityValidator:
     """Validates the quality of generated MCQ questions"""
@@ -278,7 +293,7 @@ class ContextAwareRetriever:
             is_diverse = True
             for selected_doc in selected:
                 similarity = self._calculate_similarity(candidate.page_content,
-                                                     selected_doc.page_content)
+                                                        selected_doc.page_content)
                 if similarity > self.diversity_threshold:
                     is_diverse = False
                     break
@@ -319,14 +334,110 @@ class EnhancedRAGMCQGenerator:
         """Get default configuration"""
         return {
             "embedding_model": "bkai-foundation-models/vietnamese-bi-encoder",
-            "llm_model": "google/gemma-2b-it",
+            "llm_model": "unsloth/Qwen2.5-3B", # 7B, 1.5B
             "chunk_size": 500,
             "chunk_overlap": 50,
-            "retrieval_k": 5,
+            "retrieval_k": 3,
             "generation_temperature": 0.7,
             "max_tokens": 512,
-            "diversity_threshold": 0.7
+            "diversity_threshold": 0.7,
+            "max_context_length": 600,  # Maximum context characters
+            "max_input_tokens": 1600  # Maximum total input tokens
         }
+
+    def _truncate_context(self, context: str, max_length: Optional[int] = None) -> str:
+        """Intelligently truncate context to fit within token limits"""
+        actual_max_length = max_length if max_length is not None else self.config["max_context_length"]
+
+        if len(context) <= actual_max_length:
+            return context
+
+        # Try to truncate at sentence boundary
+        sentences = context.split('. ')
+        truncated = ""
+
+        for sentence in sentences:
+            if len(truncated + sentence + '. ') <= actual_max_length:
+                truncated += sentence + '. '
+            else:
+                break
+
+        # If no complete sentences fit, truncate at word boundary
+        if not truncated:
+            words = context.split()
+            truncated = ""
+            for word in words:
+                if len(truncated + word + ' ') <= actual_max_length:
+                    truncated += word + ' '
+                else:
+                    break
+
+        return truncated.strip()
+
+    def _estimate_token_count(self, text: str) -> int:
+        """Estimate token count for Vietnamese text (approximation)"""
+        # Vietnamese typically has ~0.75 tokens per character
+        return int(len(text) * 0.75)
+
+    def _extract_json_from_response(self, response: str) -> dict:
+        """Extract JSON from LLM response with multiple fallback strategies"""
+        import re
+
+        # Strategy 1: Clean response of prompt repetition
+        clean_response = response
+        if "Tạo câu hỏi" in response:
+            # Find where the actual response starts (after the prompt)
+            response_parts = response.split("JSON:")
+            if len(response_parts) > 1:
+                clean_response = response_parts[-1].strip()
+            else:
+                # Try splitting on common phrases
+                for split_phrase in ["QUAN TRỌNG:", "Trả về JSON:", "{"]:
+                    if split_phrase in response:
+                        clean_response = response.split(split_phrase)[-1].strip()
+                        if split_phrase == "{":
+                            clean_response = "{" + clean_response
+                        break
+
+        # Strategy 2: Find JSON boundaries
+        json_start = clean_response.find("{")
+        json_end = clean_response.rfind("}") + 1
+
+        if json_start != -1 and json_end > json_start:
+            json_text = clean_response[json_start:json_end]
+            try:
+                return json.loads(json_text)
+            except json.JSONDecodeError:
+                pass
+
+        # Strategy 3: Use regex to find JSON-like structures
+        json_pattern = r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}'
+        json_matches = re.findall(json_pattern, clean_response, re.DOTALL)
+
+        for json_match in reversed(json_matches):  # Try from last to first
+            try:
+                return json.loads(json_match)
+            except json.JSONDecodeError:
+                continue
+
+        # Strategy 4: Try to fix common JSON issues
+        for json_match in reversed(json_matches):
+            try:
+                # Fix common issues like trailing commas
+                fixed_json = re.sub(r',(\s*[}\]])', r'\1', json_match)
+                return json.loads(fixed_json)
+            except json.JSONDecodeError:
+                continue
+
+        raise ValueError("No valid JSON found in response")
+
+    def check_prompt_length(self, prompt: str) -> Tuple[bool, int]:
+        """Check if prompt length is within safe limits"""
+        estimated_tokens = self._estimate_token_count(prompt)
+        max_safe_tokens = self.config["max_input_tokens"]
+
+        is_safe = estimated_tokens <= max_safe_tokens
+        return is_safe, estimated_tokens
 
     def initialize_system(self):
         """Initialize all system components"""
@@ -358,7 +469,7 @@ class EnhancedRAGMCQGenerator:
             bnb_4bit_quant_type="nf4"
         )
 
-        model = AutoModelForCausalLM.from_pretrained(
+        model, tokenizer = FastLanguageModel.from_pretrained(
             self.config["llm_model"],
             quantization_config=bnb_config,
             low_cpu_mem_usage=True,
@@ -366,7 +477,7 @@ class EnhancedRAGMCQGenerator:
             token=hf_token
         )
 
-        tokenizer = AutoTokenizer.from_pretrained(self.config["llm_model"])
+        # tokenizer = AutoTokenizer.from_pretrained(self.config["llm_model"])
         tokenizer.pad_token = tokenizer.eos_token
 
         model_pipeline = pipeline(
@@ -406,6 +517,9 @@ class EnhancedRAGMCQGenerator:
 
     def build_vector_database(self, docs: List[Document]) -> int:
         """Build vector database with semantic chunking"""
+        if not self.embeddings:
+            raise RuntimeError("Embeddings not initialized. Call initialize_system() first.")
+
         chunker = SemanticChunker(
             embeddings=self.embeddings,
             buffer_size=1,
@@ -432,15 +546,18 @@ class EnhancedRAGMCQGenerator:
                      difficulty: DifficultyLevel = DifficultyLevel.MEDIUM,
                      question_type: QuestionType = QuestionType.DEFINITION,
                      context_query: Optional[str] = None) -> MCQQuestion:
-        """Generate a single MCQ"""
+        """Generate a single MCQ with proper length management"""
 
         if not self.retriever:
             raise RuntimeError("System not initialized. Call initialize_system() first.")
 
+        if not self.llm:
+            raise RuntimeError("LLM not initialized. Call initialize_system() first.")
+
         # Use topic as query if no specific context query provided
         query = context_query or topic
 
-        # Retrieve relevant contexts
+        # Retrieve relevant contexts (reduced number)
         contexts = self.retriever.retrieve_diverse_contexts(
             query, k=self.config["retrieval_k"]
         )
@@ -448,14 +565,15 @@ class EnhancedRAGMCQGenerator:
         if not contexts:
             raise ValueError(f"No relevant context found for topic: {topic}")
 
-        # Format contexts
+        # Format and truncate contexts
         context_text = "\n\n".join(doc.page_content for doc in contexts)
+        context_text = self._truncate_context(context_text)
 
         # Get appropriate prompt template
         template_text = self.prompt_manager.get_template(question_type)
         prompt_template = PromptTemplate.from_template(template_text)
 
-        # Generate question
+        # Generate question with length checking
         prompt_input = {
             "context": context_text,
             "topic": topic,
@@ -464,16 +582,47 @@ class EnhancedRAGMCQGenerator:
         }
 
         formatted_prompt = prompt_template.format(**prompt_input)
-        response = self.llm(formatted_prompt)
+
+        # Check prompt length and truncate if necessary
+        is_safe, token_count = self.check_prompt_length(formatted_prompt)
+
+        if not is_safe:
+            print(f"⚠️ Prompt too long ({token_count} tokens), truncating context...")
+            # Further reduce context
+            reduced_context = self._truncate_context(context_text, 400)
+            prompt_input["context"] = reduced_context
+            formatted_prompt = prompt_template.format(**prompt_input)
+            is_safe, token_count = self.check_prompt_length(formatted_prompt)
+
+            if not is_safe:
+                print(f"⚠️ Still too long ({token_count} tokens), using minimal context...")
+                # Use only first paragraph
+                minimal_context = context_text.split('\n')[0][:300]
+                prompt_input["context"] = minimal_context
+                formatted_prompt = prompt_template.format(**prompt_input)
+
+        print(f"📏 Prompt length: {self._estimate_token_count(formatted_prompt)} tokens")
+
+        try:
+            response = self.llm.invoke(formatted_prompt)
+            print(f"✅ Generated response length: {len(response)} characters")
+        except Exception as e:
+            if "length" in str(e).lower():
+                print(f"❌ Length error persists: {e}")
+                # Emergency fallback - use very short context
+                emergency_context = topic + ": " + context_text[:200]
+                prompt_input["context"] = emergency_context
+                formatted_prompt = prompt_template.format(**prompt_input)
+                print(f"🚨 Emergency context length: {self._estimate_token_count(formatted_prompt)} tokens")
+                response = self.llm.invoke(formatted_prompt)
+            else:
+                raise e
 
         # Parse JSON response
         try:
-            # Extract JSON from response
-            json_start = response.rfind("{")
-            json_end = response.rfind("}") + 1
-            json_text = response[json_start:json_end]
-
-            response_data = json.loads(json_text)
+            print(f"🔍 Parsing response (first 300 chars): {response[:300]}...")
+            response_data = self._extract_json_from_response(response)
+            print(f"✅ Successfully parsed JSON response")
 
             # Create MCQ object
             options = []
@@ -483,7 +632,7 @@ class EnhancedRAGMCQGenerator:
 
             mcq = MCQQuestion(
                 question=response_data["question"],
-                context=context_text[:500] + "..." if len(context_text) > 500 else context_text,
+                context=prompt_input["context"],  # Use the truncated context
                 options=options,
                 explanation=response_data.get("explanation", ""),
                 difficulty=difficulty.value,
@@ -498,6 +647,8 @@ class EnhancedRAGMCQGenerator:
             return mcq
 
         except (json.JSONDecodeError, KeyError) as e:
+            print(f"❌ Response parsing error: {e}")
+            print(f"Raw response: {response[:500]}...")
             raise ValueError(f"Failed to parse LLM response: {e}")
 
     def generate_batch(self,
@@ -545,7 +696,7 @@ class EnhancedRAGMCQGenerator:
             "metadata": {
                 "total_questions": len(mcqs),
                 "generation_timestamp": time.time(),
-                "average_quality": np.mean([mcq.confidence_score for mcq in mcqs])
+                "average_quality": np.mean([mcq.confidence_score for mcq in mcqs]) if mcqs else 0
             },
             "questions": [mcq.to_dict() for mcq in mcqs]
         }
@@ -555,58 +706,122 @@ class EnhancedRAGMCQGenerator:
 
         print(f"📁 Exported {len(mcqs)} MCQs to {output_path}")
 
+    def debug_system_state(self):
+        """Debug function to check system initialization state"""
+        print("🔍 System Debug Information:")
+        print(f"  Embeddings initialized: {'✅' if self.embeddings else '❌'}")
+        print(f"  LLM initialized: {'✅' if self.llm else '❌'}")
+        print(f"  Vector database created: {'✅' if self.vector_db else '❌'}")
+        print(f"  Retriever initialized: {'✅' if self.retriever else '❌'}")
+        print(f"  Config loaded: {'✅' if self.config else '❌'}")
+
+        if self.config:
+            print(f"  Embedding model: {self.config.get('embedding_model', 'Not set')}")
+            print(f"  LLM model: {self.config.get('llm_model', 'Not set')}")
+            print(f"  Max context length: {self.config.get('max_context_length', 'Not set')}")
+            print(f"  Max input tokens: {self.config.get('max_input_tokens', 'Not set')}")
+
+        # Show template information
+        template_info = self.prompt_manager.get_template_info()
+        print(f"  Template sizes:")
+        for template_type, size in template_info.items():
+            print(f"    {template_type}: {size} characters")
+
+
+def debug_prompt_templates():
+    """Debug function to test prompt template generation"""
+    print("🔍 Testing Prompt Templates:")
+    prompt_manager = PromptTemplateManager()
+
+    for question_type in QuestionType:
+        try:
+            template = prompt_manager.get_template(question_type)
+            print(f"  {question_type.value}: ✅ Template loaded ({len(template)} chars)")
+        except Exception as e:
+            print(f"  {question_type.value}: ❌ Error - {e}")
+
 
 def main():
     """Main function demonstrating the enhanced RAG MCQ system"""
     print("🚀 Starting Enhanced RAG MCQ Generation System")
 
+    # Test prompt templates first
+    print("\n🧪 Testing prompt templates...")
+    debug_prompt_templates()
+
     # Initialize system
     generator = EnhancedRAGMCQGenerator()
-    generator.initialize_system()
 
-    # Load documents
-    folder_path = "pdf_folder"  # Update with your path
+    # Check initial state
+    print("\n🔍 Initial system state:")
+    generator.debug_system_state()
+
     try:
-        docs, filenames = generator.load_documents(folder_path)
-        num_chunks = generator.build_vector_database(docs)
+        generator.initialize_system()
 
-        print(f"📚 System ready with {len(filenames)} files and {num_chunks} chunks")
+        # Check state after initialization
+        print("\n🔍 Post-initialization state:")
+        generator.debug_system_state()
 
-        # Generate sample MCQs
-        topics = ["Object-Oriented Programming", "Inheritance", "Polymorphism"]
+        # Load documents
+        folder_path = "pdfs"  # Updated path to your PDF folder
+        try:
+            docs, filenames = generator.load_documents(folder_path)
+            num_chunks = generator.build_vector_database(docs)
 
-        # Single question generation
-        print("\n🎯 Generating single MCQ...")
-        mcq = generator.generate_mcq(
-            topic="OOP",
-            difficulty=DifficultyLevel.MEDIUM,
-            question_type=QuestionType.DEFINITION
-        )
+            print(f"📚 System ready with {len(filenames)} files and {num_chunks} chunks")
 
-        print(f"Question: {mcq.question}")
-        print(f"Quality Score: {mcq.confidence_score:.1f}")
+            # Generate sample MCQs
+            topics = ["Statistics"]
 
-        # Batch generation
-        print("\n🎯 Generating batch MCQs...")
-        mcqs = generator.generate_batch(
-            topics=topics,
-            count_per_topic=2
-        )
+            # Single question generation
+            print("\n🎯 Generating single MCQ...")
+            mcq = generator.generate_mcq(
+                topic=topics[0],
+                difficulty=DifficultyLevel.MEDIUM,
+                question_type=QuestionType.DEFINITION
+            )
 
-        # Export results
-        output_path = "generated_mcqs.json"
-        generator.export_mcqs(mcqs, output_path)
+            print(f"Question: {mcq.question}")
+            print(f"Quality Score: {mcq.confidence_score:.1f}")
 
-        # Quality summary
-        quality_scores = [mcq.confidence_score for mcq in mcqs]
-        print(f"\n📊 Quality Summary:")
-        print(f"Average Quality: {np.mean(quality_scores):.1f}")
-        print(f"Min Quality: {np.min(quality_scores):.1f}")
-        print(f"Max Quality: {np.max(quality_scores):.1f}")
+            # Batch generation
+            print("\n🎯 Generating batch MCQs...")
+            mcqs = generator.generate_batch(
+                topics=topics,
+                count_per_topic=2
+            )
+
+            # Export results
+            output_path = "generated_mcqs.json"
+            generator.export_mcqs(mcqs, output_path)
+
+            # Quality summary
+            quality_scores = [mcq.confidence_score for mcq in mcqs]
+            print(f"\n📊 Quality Summary:")
+            print(f"Average Quality: {np.mean(quality_scores):.1f}")
+            print(f"Min Quality: {np.min(quality_scores):.1f}")
+            print(f"Max Quality: {np.max(quality_scores):.1f}")
+
+        except FileNotFoundError as e:
+            print(f"❌ Document folder error: {e}")
+            print("💡 Please ensure your PDF files are in the 'pdfs' folder")
+        except Exception as e:
+            print(f"❌ Document processing error: {e}")
+            print("💡 Check your PDF files and folder structure")
 
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"❌ System initialization error: {e}")
+        print("💡 Check your dependencies and API keys")
+        generator.debug_system_state()
 
 
 if __name__ == "__main__":
+    # Check system components
+    # generator = EnhancedRAGMCQGenerator()
+    # generator.debug_system_state()
+
+    # # Test templates separately
+    # debug_prompt_templates()
+
     main()
