@@ -338,7 +338,7 @@ class EnhancedRAGMCQGenerator:
         """Get default configuration"""
         return {
             "embedding_model": "bkai-foundation-models/vietnamese-bi-encoder",
-            "llm_model": "unsloth/Qwen2.5-3B", # 7B, 1.5B
+            "llm_model": "unsloth/Qwen2.5-3B-Instruct-unsloth-bnb-4bit", # 7B, 1.5B
             "chunk_size": 500,
             "chunk_overlap": 50,
             "retrieval_k": 3,

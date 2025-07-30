@@ -59,7 +59,7 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-#? cmd: uvicorn app:app --reload --reload-exclude unsloth_compiled_cache
+#? cmd: fastapi run app.py
 @app.post("/generate/")
 async def mcq_gen(
     file: UploadFile = File(...),
