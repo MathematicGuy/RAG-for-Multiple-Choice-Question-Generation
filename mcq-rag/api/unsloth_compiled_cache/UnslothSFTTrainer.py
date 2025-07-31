@@ -1,6 +1,6 @@
 """
-2025.7.10
-2025.7.9
+2025.7.11
+2025.7.11
 4.53.2
 0.19.1
 __UNSLOTH_VERSIONING__
@@ -510,7 +510,7 @@ class _UnslothSFTTrainer(Trainer):
 
         # PEFT configuration and model wrapping
         if False:
-            model = self._prepare_peft_model(model, peft_config, args)
+            pass
 
         # Data collator
         # FFD packing requires padding-free mode; otherwise, the collator outputs padded attention masks, causing
@@ -754,7 +754,10 @@ class _UnslothSFTTrainer(Trainer):
         dataset_name: str,
     ) -> Union[Dataset, IterableDataset]:
         # All Unsloth Zoo code licensed under LGPLv3
-        if isinstance(dataset, ConstantLengthDataset): return dataset
+        try:
+            if isinstance(dataset, ConstantLengthDataset): return dataset
+        except:
+            pass
     
         map_kwargs = {}
         use_desc = isinstance(dataset, Dataset)
