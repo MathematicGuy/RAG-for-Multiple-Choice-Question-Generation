@@ -338,7 +338,8 @@ class EnhancedRAGMCQGenerator:
         """Get default configuration"""
         return {
             "embedding_model": "bkai-foundation-models/vietnamese-bi-encoder",
-            "llm_model": "unsloth/Qwen2.5-3B-Instruct-unsloth-bnb-4bit", # 7B, 1.5B
+            # "llm_model": "unsloth/Qwen2.5-3B-Instruct", # 7B, 1.5B
+
             "chunk_size": 500,
             "chunk_overlap": 50,
             "retrieval_k": 3,
@@ -383,7 +384,7 @@ class EnhancedRAGMCQGenerator:
         # Vietnamese typically has ~0.75 tokens per character
         return int(len(text) * 0.75)
 
-     #? Parse Json String
+	#? Parse Json String
     def _extract_json_from_response(self, response: str) -> dict:
         """Extract JSON from LLM response with multiple fallback strategies"""
         import re
