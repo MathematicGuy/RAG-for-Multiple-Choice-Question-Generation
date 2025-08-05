@@ -338,8 +338,7 @@ class EnhancedRAGMCQGenerator:
         """Get default configuration"""
         return {
             "embedding_model": "bkai-foundation-models/vietnamese-bi-encoder",
-            # "llm_model": "unsloth/Qwen2.5-3B-Instruct", # 7B, 1.5B
-
+            "llm_model": "google/gemma-2-2b-it", # 7B, 1.5B
             "chunk_size": 500,
             "chunk_overlap": 50,
             "retrieval_k": 3,
@@ -475,7 +474,7 @@ class EnhancedRAGMCQGenerator:
             bnb_4bit_quant_type="nf4"
         )
 
-        model, tokenizer = FastLanguageModel.from_pretrained(
+        model = AutoModelForCausalLM.from_pretrained(
             self.config["llm_model"],
             quantization_config=bnb_config,
             low_cpu_mem_usage=True,
@@ -483,8 +482,8 @@ class EnhancedRAGMCQGenerator:
             token=hf_token
         )
 
-        # tokenizer = AutoTokenizer.from_pretrained(self.config["llm_model"])
-        tokenizer.pad_token = tokenizer.eos_token
+        tokenizer = AutoTokenizer.from_pretrained(self.config["llm_model"])
+        # tokenizer.pad_token = tokenizer.eos_token
 
         model_pipeline = pipeline(
             "text-generation",

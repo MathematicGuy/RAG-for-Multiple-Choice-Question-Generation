@@ -6,14 +6,22 @@ torch
 accelerate
 bitsandbytes
 sentence-transformers
-langchain_community
+
+# LangChain Libraries
+langchain-community
+langchain-huggingface
+langchain-experimental
+langchain-core
+
+# Finetunning llm-model
+unsloth
 
 ## Vector Database
 faiss-cpu>=1.7.4
 
 ## Document Processing
 pypdf>=3.0.0
-unstructured>=0.8.0
+unstructured>=0.8.0 # unstructure data into json schema for llm-ready
 
 ## Data Science
 numpy>=1.24.0
@@ -34,5 +42,5 @@ contextlib
 ## Development
 jupyter>=1.0.0
 notebook>=6.5.0
-# black>=23.0.0
+black>=23.0.0
 pytest>=7.4.0
