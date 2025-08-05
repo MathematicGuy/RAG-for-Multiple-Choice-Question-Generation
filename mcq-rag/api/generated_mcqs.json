@@ -1,21 +1,21 @@
 {
   "metadata": {
     "total_questions": 6,
-    "generation_timestamp": 1753338297.9406896,
+    "generation_timestamp": 1753322591.8074632,
     "average_quality": 81.66666666666667
   },
   "questions": [
     {
-      "question": "Từ @abstractmethod dùng trong lập trình hướng đối tượng có nghĩa là gì?",
+      "question": "Từ @abstractmethod được sử dụng để mô tả một phương thức trong lập trình hướng đối tượng?",
       "context": "AI VIETNAM aivietnam.edu.vn\n7 Abstraction (T rừu tượng)\nT rong lập trình hướng đối tượng, @abstractmethod được sử dụng trong kế thừa như một cam\nkết hoặc mong muốn từ lớp cha dành cho lớp con. Lớp cha khai báo phương thức đó nhưng\nkhông tự triển khai, vì nó chỉ định hướng hành vi mong đợi. Việc hiện thực hóa chức năng được\ngiao cho lớp con đảm nhận. Tưởng tượng lớp cha như cha mẹ đặt ra “ước muốn” – ví dụ: “Con\ncần phải biết tự giới thiệu bản thân”, nhưng cha mẹ không thực hiện thay , mà mong lớp con tự\nđịnh nghĩa và thực hiện điều đó theo cách riêng.",
       "options": {
-        "A": "Đề nghị lớp con phải khai báo nhưng không thực hiện",
-        "B": "Lấy ý tưởng về cách hành vi từ lớp cha",
-        "C": "Khuyến khích lớp con khai báo và thực hiện",
-        "D": "Hướng dẫn lớp cha về cách hành vi"
+        "A": "Đúng",
+        "B": "Sai",
+        "C": "Không biết",
+        "D": "Không có câu trả lời"
       },
       "correct_answer": "A",
-      "explanation": "Đáp án A chính xác vì @abstractmethod được sử dụng để yêu cầu lớp con phải khai báo nhưng không thực hiện phương thức mà lớp cha đã khai báo. Điều này tạo ra một cam kết hoặc mong muốn mà lớp con có thể thực hiện hoặc không thực hiện.",
+      "explanation": "Đúng, @abstractmethod được sử dụng trong lập trình hướng đối tượng để mô tả một phương thức mong đợi từ lớp con.",
       "difficulty": "easy",
       "topic": "Object Oriented Programming",
       "question_type": "definition",
@@ -23,84 +23,86 @@
       "confidence_score": 100.0
     },
     {
-      "question": "Chúng ta sử dụng @abstractmethod trong lập trình hướng đối tượng để:",
+      "question": "Trong lập trình hướng đối tượng, @abstractmethod được sử dụng như thế nào?",
       "context": "AI VIETNAM aivietnam.edu.vn\n7 Abstraction (T rừu tượng)\nT rong lập trình hướng đối tượng, @abstractmethod được sử dụng trong kế thừa như một cam\nkết hoặc mong muốn từ lớp cha dành cho lớp con. Lớp cha khai báo phương thức đó nhưng\nkhông tự triển khai, vì nó chỉ định hướng hành vi mong đợi. Việc hiện thực hóa chức năng được\ngiao cho lớp con đảm nhận. Tưởng tượng lớp cha như cha mẹ đặt ra “ước muốn” – ví dụ: “Con\ncần phải biết tự giới thiệu bản thân”, nhưng cha mẹ không thực hiện thay , mà mong lớp con tự\nđịnh nghĩa và thực hiện điều đó theo cách riêng.",
       "options": {
-        "A": "Để mô tả một phương thức cần được hiện thực hóa bởi lớp con",
-        "B": "Để giới hạn phạm vi sử dụng của phương thức trong lớp cha",
-        "C": "Để khai báo một phương thức không có implementation trong lớp cha",
-        "D": "Để bắt buộc lớp con phải kế thừa phương thức từ lớp cha"
+        "A": "Để tạo ra một lớp con",
+        "B": "Để khai báo một phương thức cho lớp con",
+        "C": "Để hiện thực hóa chức năng cho lớp con",
+        "D": "Để buộc lớp con phải thực hiện một hành vi nhất định"
       },
-      "correct_answer": "A",
-      "explanation": "Đáp án A đúng bởi @abstractmethod được sử dụng trong lập trình hướng đối tượng để mô tả một phương thức cần phải được hiện thực hóa bởi lớp con. Lớp cha chỉ khai báo phương thức đó nhưng không thực hiện mà mong đợi lớp con tự định nghĩa và triển khai phương thức đó theo cách riêng.",
+      "correct_answer": "D",
+      "explanation": "Trong lập trình hướng đối tượng, @abstractmethod được sử dụng để buộc lớp con phải thực hiện một hành vi nhất định. Lớp cha chỉ định hướng hành vi mong đợi, nhưng lớp con là người hiện thực hóa và thực hiện điều đó.",
       "difficulty": "medium",
       "topic": "Object Oriented Programming",
       "question_type": "application",
       "source": "pdfs\\oop.pdf",
       "confidence_score": 100.0
-    },
+    }, # TH đăng 1 file lên, file quá ngắn thiếu thông tin. Vì gọi hàm mỗi khi sinh nên LLM thiếu ngữ cảnh -> Ko biết câu hỏi trước đó có nội dung gì, nên ko biết là nên sinh nội dung ntn để không trùng. 
     {
-      "question": "Malware Reverse Engineering",
+      "question": "Malware Reverse Engineering là gì?",
       "context": "Tallinn 2020 \n \n \n \n \nMalware Reverse Engineering \nHandbook \nAhmet BALCI \nDan UNGUREANU \nJaromír VONDRUŠKA \n \nNATO CCDCOE\n\n5 \n \nAbstract \nMalware is a growing threat which causes considerable cost to individuals, companies and \ninstitutions. Since basic signature-based antivirus defences are not very useful against recently \nemerged malware threats or APT attacks, it is essential for an investigator to have the fundamental \nskillset in order to analyse and mitigate these threats.",
       "options": {
-        "A": "Một kỹ thuật nhằm phân tích mã độc",
-        "B": "Một kỹ thuật nhằm tạo mã độc",
-        "C": "Một kỹ thuật nhằm tạo mã không độc hại",
-        "D": "Một kỹ thuật nhằm phân tích mã không độc hại"
+        "A": "Đây là quá trình phân tích mã của malware để tìm hiểu cách nó hoạt động và phát hiện các điểm yếu để ngăn chặn.",
+        "B": "Đây là cách để tạo malware mới bằng cách sử dụng mã của malware đã tìm ra.",
+        "C": "Đây là cách để ẩn mã của malware để nó không bị phát hiện.",
+        "D": "Đây là quá trình dọn dẹp máy tính bị nhiễm malware."
       },
       "correct_answer": "A",
-      "explanation": "Malware Reverse Engineering là một kỹ thuật nhằm phân tích mã độc bằng cách nghiên cứu và hiểu rõ mã của chúng. Đây là một kỹ thuật quan trọng trong việc chống lại mã độc hại và các cuộc tấn công APT.",
+      "explanation": "Malware Reverse Engineering là một kỹ thuật để phân tích mã của malware để tìm hiểu cách nó hoạt động và phát hiện các điểm yếu để ngăn chặn.",
       "difficulty": "easy",
       "topic": "Malware Reverse Engineering",
       "question_type": "definition",
-      "source": "pdfs\\malware-reverse-engineering-handbook.pdf",
-      "confidence_score": 100.0
-    },
-    {
-      "question": "Để phân tích và giảm thiểu mối đe dọa do malware gây ra, một thám tử cần đạt được các kỹ năng cơ bản như thế nào?",
-      "context": "Tallinn 2020 \n \n \n \n \nMalware Reverse Engineering \nHandbook \nAhmet BALCI \nDan UNGUREANU \nJaromír VONDRUŠKA \n \nNATO CCDCOE\n\n5 \n \nAbstract \nMalware is a growing threat which causes considerable cost to individuals, companies and \ninstitutions. Since basic signature-based antivirus defences are not very useful against recently \nemerged malware threats or APT attacks, it is essential for an investigator to have the fundamental \nskillset in order to analyse and mitigate these threats.",
-      "options": {
-        "A": "Biến thể và loại bỏ malware",
-        "B": "Lập trình mã độc",
-        "C": "Thử nghiệm và đánh giá hệ thống",
-        "D": "Tự động hóa các cuộc tấn công"
-      },
-      "correct_answer": "A",
-      "explanation": "Đáp án A là đúng vì phân tích và giảm thiểu mối đe dọa do malware cần phải có khả năng phân tích và hiểu malware, biến thể và loại bỏ chúng.",
-      "difficulty": "medium",
-      "topic": "Malware Reverse Engineering",
-      "question_type": "application",
       "source": "pdfs\\malware-reverse-engineering-handbook.pdf",
       "confidence_score": 90.0
     },
     {
-      "question": "Định nghĩa IoT là gì?",
+      "question": "Để phân tích và ngăn chặn các mối đe dọa của malware, một công cụ quan trọng là gì?",
+      "context": "Tallinn 2020 \n \n \n \n \nMalware Reverse Engineering \nHandbook \nAhmet BALCI \nDan UNGUREANU \nJaromír VONDRUŠKA \n \nNATO CCDCOE\n\n5 \n \nAbstract \nMalware is a growing threat which causes considerable cost to individuals, companies and \ninstitutions. Since basic signature-based antivirus defences are not very useful against recently \nemerged malware threats or APT attacks, it is essential for an investigator to have the fundamental \nskillset in order to analyse and mitigate these threats.",
+      "options": {
+        "A": "Malware Analysis Tools",
+        "B": "Network Intrusion Detection Systems",
+        "C": "Web Application Firewalls",
+        "D": "Antivirus Software"
+      },
+      "correct_answer": "A",
+      "explanation": "Malware Analysis Tools là một công cụ quan trọng để phân tích, hiểu và ngăn chặn các mối đe doạ từ malware. Chúng hỗ trợ việc truy cập vào mã của malware để nghiên cứu và đánh giá các đặc tính của chúng, từ đó giúp các chuyên gia có thể phát hiện các yêu cầu hoặc tác hại tiềm ẩn của chúng.",
+      "difficulty": "medium",
+      "topic": "Malware Reverse Engineering",
+      "question_type": "application",
+      "source": "pdfs\\malware-reverse-engineering-handbook.pdf",
+      "confidence_score": 100.0
+    },
+    {
+      "question": "Chuẩn bị cho kỳ thi TOEIC, bạn cần phải làm gì?",
       "context": "Chương 1\nTổng quan về IoT\n1.1 IoT là gì? Internet of Things (IoT) là một hệ thống gồm các thiết bị được gọi là\n\"vật\"(Ví dụ: Đèn, điều hòa, xe, v.v). Những thiết bị này có các bộ phận\nđiện tử cho phép chúng có khả năng tự động thu thập dữ liệu thông qua\ncảm biến, xử lý và trao đổi dữ liệu qua mạng.",
       "options": {
-        "A": "Hệ thống các thiết bị điện tử tự động thu thập, xử lý và trao đổi dữ liệu thông qua mạng",
-        "B": "Hệ thống các thiết bị máy tính tự động thu thập, xử lý và trao đổi dữ liệu thông qua mạng",
-        "C": "Hệ thống các thiết bị điện tử định nghĩa dữ liệu tự động thu thập, xử lý và trao đổi thông qua mạng",
-        "D": "Hệ thống các thiết bị điện tử tự động thu thập, xử lý và trao đổi dữ liệu thông qua mạng"
+        "A": "Đi học thường xuyên",
+        "B": "Bắt đầu từ việc tìm hiểu các bài tập và luyện thi",
+        "C": "Tham gia vào một hoặc nhiều câu lạc bộ để cải thiện khả năng giao tiếp",
+        "D": "Tìm kiếm một số sách giáo khoa để học ngoại ngữ",
+        "E": "Tìm kiếm một số trung tâm luyện thi để thực hành",
+        "F": "Tìm kiếm một số tài liệu trong phòng thi để làm quen với cấu trúc bài thi"
       },
       "correct_answer": "D",
-      "explanation": "IoT (Internet of Things) là một hệ thống gồm các thiết bị điện tử được gọi là 'vật' (ví dụ: đèn, điều hòa, xe, v.v.) có khả năng tự động thu thập, xử lý và trao đổi dữ liệu qua mạng.",
+      "explanation": "Giải thích tại sao đáp án D đúng",
       "difficulty": "easy",
       "topic": "IoT",
       "question_type": "definition",
       "source": "pdfs\\iot_security_report.pdf",
       "confidence_score": 0.0
-    },
+    }, Lỗi Hallucination khi viết tên chủ dề (topic) không rõ ràng
     {
-      "question": "Điều gì là một trong những đặc điểm chính của IoT?",
+      "question": "Bạn có thể xác định IoT là gì?",
       "context": "Chương 1\nTổng quan về IoT\n1.1 IoT là gì? Internet of Things (IoT) là một hệ thống gồm các thiết bị được gọi là\n\"vật\"(Ví dụ: Đèn, điều hòa, xe, v.v). Những thiết bị này có các bộ phận\nđiện tử cho phép chúng có khả năng tự động thu thập dữ liệu thông qua\ncảm biến, xử lý và trao đổi dữ liệu qua mạng.",
       "options": {
-        "A": "Tự động thu thập dữ liệu thông qua cảm biến, xử lý và trao đổi dữ liệu qua mạng",
-        "B": "Các thiết bị cần phải được gắn kết trực tiếp với nhau",
-        "C": "Không có thiết bị nào được đặt vào hệ thống IoT",
-        "D": "Chính phủ quản lý các thiết bị thông minh"
+        "A": "Hệ thống các thiết bị điện tử được kết nối với nhau để trao đổi dữ liệu",
+        "B": "Hệ thống các thiết bị điện tử có thể tự động điều khiển",
+        "C": "Hệ thống các thiết bị điện tử chỉ có chức năng truyền thông",
+        "D": "Hệ thống các thiết bị điện tử không được kết nối với nhau"
       },
       "correct_answer": "A",
-      "explanation": "Đáp án A đúng vì nó mô tả chính xác các đặc điểm của IoT, đó là hệ thống bao gồm các thiết bị được gọi là 'vật' có khả năng tự động thu thập, xử lý và trao đổi dữ liệu thông qua mạng.",
+      "explanation": "Hệ thống IoT (Internet of Things) bao gồm các thiết bị điện tử được kết nối với nhau để trao đổi dữ liệu, giúp thiết bị có khả năng tự động thu thập, xử lý và trao đổi dữ liệu qua mạng, mang lại nhiều tiện ích cho đời sống và công việc. Do đó, đáp án A là phù hợp nhất với định nghĩa của IoT.",
       "difficulty": "medium",
       "topic": "IoT",
       "question_type": "application",
@@ -109,3 +111,5 @@
     }
   ]
 }
+
+Các câu hỏi được sinh ra sẽ được paste vào 1 file. Hoặc gửi thẳng qua 1 json string qua API
