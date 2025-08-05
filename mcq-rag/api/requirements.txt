@@ -1,12 +1,5 @@
 # Enhanced RAG MCQ Generator - Requirements
 
-## Core Dependencies
-# langchain>=0.1.0
-# langchain-community>=0.0.29
-# langchain-experimental>=0.0.55
-# langchain-huggingface>=0.0.3
-# langchain-core>=0.1.45
-
 # AI/ML Libraries
 transformers
 torch
@@ -23,13 +16,8 @@ pypdf>=3.0.0
 unstructured>=0.8.0
 
 ## Data Science
-# numpy>=1.24.0
-# pandas>=2.0.0
-
-## Evaluation Metrics
-nltk>=3.8
-rouge-score>=0.1.2
-bert-score>=0.3.12
+numpy>=1.24.0
+pandas>=2.0.0
 
 ## Web Framework (for future API)
 fastapi>=0.100.0
@@ -40,9 +28,11 @@ streamlit>=1.25.0
 python-dotenv>=1.0.0
 tqdm>=4.65.0
 pydantic>=2.0.0
+shutil
+contextlib
 
 ## Development
 jupyter>=1.0.0
 notebook>=6.5.0
-black>=23.0.0
+# black>=23.0.0
 pytest>=7.4.0
