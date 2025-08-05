@@ -1,8 +1,7 @@
 __pycache__
 .vscode
-data
-api_key/*
-api_key
 LangChain/langchain-course
-../TestingFeatures/generated/pdfs/iot_security_report.pdf
-../mcq-rag/api/unsloth_compiled_cache
+Testing
+mcq-rag/api/tokens
+mcq-rag/api/unsloth_compiled_cache
+mcq-rag/api/tmp

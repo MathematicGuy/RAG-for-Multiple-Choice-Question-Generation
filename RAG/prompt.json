@@ -1,5 +1,0 @@
-{
-	"prompts": {
-		"multi_choice": "Dựa vào nội dung sau, hãy:\n\n1. Tóm tắt tối đa 3 ý chính, mỗi ý kèm số trang nếu có.\n2. Trả lời câu hỏi bằng tiếng Việt ngắn gọn và chính xác.\n3. Nếu không có thông tin liên quan, hãy để giá trị của \"answer\" là \"Không có dữ liệu liên quan\".\n\nTrả kết quả **chỉ dưới dạng JSON**, theo cấu trúc sau:\n\n{\n  \"main_ideas\": [\n    { \"point\": \"Ý chính 1\", \"source\": \"Trang ...\" },\n    { \"point\": \"Ý chính 2\", \"source\": \"Trang ...\" },\n    { \"point\": \"Ý chính 3\", \"source\": \"Trang ...\" }\n  ],\n  \"answer\": \"Câu trả lời ngắn gọn\"\n}\n\n**Không giải thích thêm.**\n\nContext:\n{ context }\n\nQuestion:\n{ question }\n\nAnswer:"
-	}
-}

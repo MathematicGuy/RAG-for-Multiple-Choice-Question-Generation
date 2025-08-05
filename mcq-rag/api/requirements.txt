@@ -7,12 +7,13 @@
 # langchain-huggingface>=0.0.3
 # langchain-core>=0.1.45
 
-# ## AI/ML Libraries
-# transformers>=4.30.0
-# torch>=2.0.0
-# accelerate>=0.20.0
-# bitsandbytes>=0.41.0
-# sentence-transformers>=2.2.0
+# AI/ML Libraries
+transformers
+torch
+accelerate
+bitsandbytes
+sentence-transformers
+langchain_community
 
 ## Vector Database
 faiss-cpu>=1.7.4

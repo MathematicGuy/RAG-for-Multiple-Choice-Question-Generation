@@ -422,3 +422,36 @@ Trả lời:
 	"source": "pdfs\\iot_security_report.pdf",
 	"confidence_score": 0.0,
 },
+
+
+{
+    "topics": [
+        "Internet of Things"
+    ],
+    "generated": [
+        {
+            "question": "Internet of Things (IoT) là gì?",
+            "options": {
+                "A": "Hệ thống gồm các thiết bị vật lý được truy cập qua internet",
+                "B": "Hệ thống gồm các thiết bị vật lý không được truy cập qua internet",
+                "C": "Hệ thống gồm các thiết bị điện tử không có khả năng tự động thu thập dữ liệu",
+                "D": "Hệ thống gồm các thiết bị điện tử chỉ có khả năng truyền dữ liệu theo yêu cầu"
+            },
+            "correct_answer": "A",
+            "confidence_score": 100.0
+        },
+        {
+            "question": "Internet của đồ vật (IoT) là gì?",
+            "options": {
+                "A": "Hệ thống gồm các thiết bị điện tử được gọi là 'vật'",
+                "B": "Hệ thống chỉ gồm máy tính",
+                "C": "Hệ thống chỉ gồm cảm biến",
+                "D": "Hệ thống chỉ gồm mạng máy tính"
+            },
+            "correct_answer": "A",
+            "confidence_score": 100.0
+        }
+    ],
+    "avg_confidence": 100.0,
+    "generation_time": 112.48871231079102
+}
