@@ -213,34 +213,63 @@ class DifficultyCalibrator:
 ## Technical Specifications
 
 ### Model Requirements
-- **Memory**: Minimum 8GB GPU for quantized models
-- **Storage**: 50GB for models and vector databases
+- **Memory**: Minimum 4GB VRAM GPU for quantized models
+- **Storage**: 20GB for models and vector databases
 - **Processing**: Multi-core CPU for document processing
 
 ### Dependencies
 ```python
-# Core dependencies
-langchain>=0.1.0
-transformers>=4.30.0
-torch>=2.0.0
+# AI/ML Libraries
+transformers
+torch
+accelerate
+bitsandbytes
+sentence-transformers
+
+# LangChain Libraries
+langchain-community
+langchain-huggingface
+langchain-experimental
+langchain-core
+
+# Finetunning llm-model
+unsloth
+
+## Vector Database
 faiss-cpu>=1.7.4
-sentence-transformers>=2.2.0
 
-# Document processing
+## Document Processing
 pypdf>=3.0.0
-unstructured>=0.8.0
+unstructured>=0.8.0 # unstructure data into json schema for llm-ready
 
-# Evaluation
-nltk>=3.8
-rouge-score>=0.1.2
-bert-score>=0.3.12
+## Data Science
+numpy>=1.24.0
+pandas>=2.0.0
+
+## Web Framework (for future API)
+fastapi>=0.100.0
+uvicorn>=0.23.0
+streamlit>=1.25.0
+
+## Utilities
+python-dotenv>=1.0.0
+tqdm>=4.65.0
+pydantic>=2.0.0
+shutil
+contextlib
+
+## Development
+jupyter>=1.0.0
+notebook>=6.5.0
+black>=23.0.0
+pytest>=7.4.0
 ```
 
 ### Configuration
 ```python
 CONFIG = {
     "embedding_model": "bkai-foundation-models/vietnamese-bi-encoder",
-    "llm_model": "google/gemma-2b-it",
+    "llm_model": "google/gemma-2-2b-it",
     "chunk_size": 500,
     "chunk_overlap": 50,
     "retrieval_k": 5,
