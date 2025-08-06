@@ -1,32 +1,51 @@
-# slim tag for minimal python image version
-FROM python:3.11-slim
+#? Stage 1: Build with Python 3.11 and CUDA support
+FROM pytorch/pytorch:2.1.2-cuda12.1-cudnn8-runtime
 
-#? sets the working dir inside container to /app
-# allow command (COPY, RUN, etc..) execute inside this directory
+# Set non-interactive mode for APT
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install dependencies: Python, curl, etc.
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    libgl1 \
+    python3.11 \
+    python3.11-venv \
+    python3.11-distutils \
+    python3-pip \
+&& apt-get clean \
+&& rm -rf /var/lib/apt/lists/*
+
+# Set Python 3.11 as default
+RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.11 1
+
+# Upgrade pip
+RUN python -m pip install --upgrade pip
+
+#? Stage 2: App installation
+# Ensure pipx and uv is install
+RUN python -m pip install pipx && \
+    pipx install uv && \
+    ln -s /root/.local/bin/uv /usr/local/bin/uv
+
+# Make sure uv is in PATH (adjust if needed)
+ENV PATH="/root/.local/bin:${PATH}"
+
 WORKDIR /app
 
-#? the cmd update & install apt from git
-# apt mean advance package tool
-# -y automate answers 'yes' to prompts during install
-RUN apt-get update && apt-get install -y git
+# Copy files within requirements folder
+COPY requirements/ ./requirements/
+# Pre-download wheels
+RUN uv pip download -r requirements/prod.txt -d ./wheels && \
+    uv pip install --system --no-index --find-links=./wheels -r requirements/prod.txt
 
-#? the cmd install requirements copied from the requirements.txt file without caching the file
-# copies the requirements file from host-machine into current working dir /app
-COPY requirements.txt .
-# --no-cache-dir literally mean not caching installed file
-RUN pip install --no-cache-dir -r requirements.txt
-
-#? copy everything from the current dir (the first ".") on your host machine into the container's working dir /app (the second ".")
+# Copy the rest of the code
 COPY . .
 
-#? Listen to port 8000.
-# make sure to run: docker run -p 8000:8000.
+# Set environment variable for GPU use (optional)
+ENV TRANSFORMERS_NO_ADVISORY_WARNINGS=true
+
 EXPOSE 8000
 
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"] 
-
-# docker build -t your-dockerhub-username/enhanced-rag-mcq:latest .
-# docker run -p 8000:8000 3e82eb834526   (get docker_id from 'docker images' command)
-
-# docker build -t mcq-api:local
-# docker run --rm -p 8000:8000 mcq-api:local
+# Run the app
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]

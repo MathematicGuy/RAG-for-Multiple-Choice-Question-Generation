@@ -9,9 +9,8 @@ from fastapi import FastAPI, Form, HTTPException, UploadFile, File
 from contextlib import asynccontextmanager
 
 
-
 generator: Optional[EnhancedRAGMCQGenerator] = None
-tmp_folder = "./tmp"
+tmp_folder = "./tmp" #? make sure folder upload here
 if not os.path.exists(tmp_folder):
     os.makedirs(tmp_folder)
 
@@ -39,7 +38,6 @@ class GenerateResponse(BaseModel):
     avg_confidence: float
     generation_time: float
 
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global generator
@@ -65,8 +63,8 @@ async def mcq_gen(
     file: UploadFile = File(...),
     topics: str = Form(...),
     n_questions: str = Form(...),
-    difficulty: DifficultyLevel = Form(...),
-    qtype: QuestionType = Form(...)
+    difficulty: str = Form(...),
+    qtype: str = Form(...)
 ):
     if not generator:
         raise HTTPException(status_code=500, detail="Generator not initialized")
@@ -74,6 +72,19 @@ async def mcq_gen(
     topic_list = [t.strip() for t in topics.split(',') if t.strip()]
     if not topic_list:
         raise HTTPException(status_code=400, detail="At least one topic must be provided")
+
+    # Validate and convert enum values
+    try:
+        difficulty_enum = DifficultyLevel(difficulty.lower())
+    except ValueError:
+        valid_difficulties = [d.value for d in DifficultyLevel]
+        raise HTTPException(status_code=400, detail=f"Invalid difficulty. Must be one of: {valid_difficulties}")
+
+    try:
+        qtype_enum = QuestionType(qtype.lower())
+    except ValueError:
+        valid_types = [q.value for q in QuestionType]
+        raise HTTPException(status_code=400, detail=f"Invalid question type. Must be one of: {valid_types}")
 
     # Save uploaded PDF to temporary folder
     filename = file.filename if file.filename else "uploaded_file"
@@ -93,7 +104,9 @@ async def mcq_gen(
     try:
         mcqs = generator.generate_batch(
             topics=topic_list,
-            question_per_topic=int(n_questions)
+            question_per_topic=int(n_questions),
+            difficulties=[difficulty_enum],
+            question_types=[qtype_enum]
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

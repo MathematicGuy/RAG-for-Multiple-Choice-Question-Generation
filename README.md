@@ -218,6 +218,8 @@ class DifficultyCalibrator:
 - **Processing**: Multi-core CPU for document processing
 
 ### Dependencies
+For faster installation use [UV](https://docs.astral.sh/uv/#the-pip-interface) - An extremely fast Python package and project manager, written in Rust.
+
 ```python
 # AI/ML Libraries
 transformers
@@ -231,9 +233,6 @@ langchain-community
 langchain-huggingface
 langchain-experimental
 langchain-core
-
-# Finetunning llm-model
-unsloth
 
 ## Vector Database
 faiss-cpu>=1.7.4

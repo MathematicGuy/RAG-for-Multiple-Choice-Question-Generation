@@ -11,6 +11,7 @@ import os
 import json
 import time
 import torch
+import re
 from typing import List, Dict, Any, Optional, Tuple
 from dataclasses import dataclass, asdict
 from pathlib import Path
@@ -28,7 +29,6 @@ from langchain_core.prompts import PromptTemplate
 from langchain_community.vectorstores import FAISS
 
 from langchain_core.documents import Document
-from unsloth import FastLanguageModel
 
 # Transformers imports
 from transformers import (
@@ -338,7 +338,7 @@ class EnhancedRAGMCQGenerator:
         """Get default configuration"""
         return {
             "embedding_model": "bkai-foundation-models/vietnamese-bi-encoder",
-            "llm_model": "google/gemma-2-2b-it", # 7B, 1.5B
+            "llm_model": "Qwen/Qwen2.5-3B-Instruct", # 7B, 1.5B
             "chunk_size": 500,
             "chunk_overlap": 50,
             "retrieval_k": 3,
@@ -386,7 +386,6 @@ class EnhancedRAGMCQGenerator:
 	#? Parse Json String
     def _extract_json_from_response(self, response: str) -> dict:
         """Extract JSON from LLM response with multiple fallback strategies"""
-        import re
 
         # Strategy 1: Clean response of prompt repetition
         clean_response = response
@@ -478,7 +477,7 @@ class EnhancedRAGMCQGenerator:
             self.config["llm_model"],
             quantization_config=bnb_config,
             low_cpu_mem_usage=True,
-            device_map="auto",
+            device_map="cuda", # Use CUDA if available
             token=hf_token
         )
 
