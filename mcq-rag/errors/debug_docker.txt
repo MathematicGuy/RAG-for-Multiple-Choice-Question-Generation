@@ -1,0 +1,361 @@
+root@macbookM5:/mnt/d/graduation_project/rag-for-multiple-choice-question-generation/mcq-rag/api# ls
+DOCKER_NOTE.md      Dockerfile   app.py       enhanced_rag_mcq.py  pdfs          tempCodeRunnerFile.py  tmp
+Dockercompose.yaml  __pycache__  config.json  generated_mcqs.json  requirements  test.py                tokens
+root@macbookM5:/mnt/d/graduation_project/rag-for-multiple-choice-question-generation/mcq-rag/api# docker compose up\
+>
+WARN[0000] /mnt/d/graduation_project/rag-for-multiple-choice-question-generation/mcq-rag/api/docker-compose.yaml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion
+[+] Running 2/2
+ ✔ Network api_default     Created                                                                                                              0.1s
+ ✔ Container rag_mcq_cuda  Created                                                                                                              0.2s
+Attaching to rag_mcq_cuda
+rag_mcq_cuda  |
+rag_mcq_cuda  | ==========
+rag_mcq_cuda  | == CUDA ==
+rag_mcq_cuda  | ==========
+rag_mcq_cuda  |
+rag_mcq_cuda  | CUDA Version 12.6.3
+rag_mcq_cuda  |
+rag_mcq_cuda  | Container image Copyright (c) 2016-2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+rag_mcq_cuda  |
+rag_mcq_cuda  | This container image and its contents are governed by the NVIDIA Deep Learning Container License.
+rag_mcq_cuda  | By pulling and using the container, you accept the terms and conditions of this license:
+rag_mcq_cuda  | https://developer.nvidia.com/ngc/nvidia-deep-learning-container-license
+rag_mcq_cuda  |
+rag_mcq_cuda  | A copy of this license is made available in this container at /NGC-DL-CONTAINER-LICENSE for your convenience.
+rag_mcq_cuda  |
+rag_mcq_cuda  | INFO:     Will watch for changes in these directories: ['/app']
+rag_mcq_cuda  | INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+rag_mcq_cuda  | INFO:     Started reloader process [1] using WatchFiles
+rag_mcq_cuda  | INFO:     Started server process [28]
+rag_mcq_cuda  | INFO:     Waiting for application startup.
+rag_mcq_cuda  | 🔧 Initializing Enhanced RAG MCQ Generator...
+rag_mcq_cuda  | ✅ Embeddings loaded
+
+Fetching 2 files: 100%|██████████| 2/2 [11:08<00:00, 334.01s/it]
+Loading checkpoint shards: 100%|██████████| 2/2 [00:00<00:00, -2.95it/s]
+rag_mcq_cuda  | Device set to use cuda
+rag_mcq_cuda  | INFO:     Application startup complete.
+rag_mcq_cuda  | ✅ LLM loaded
+rag_mcq_cuda  | RAG system initialized.
+rag_mcq_cuda  | INFO:     172.18.0.1:59866 - "GET /docs HTTP/1.1" 200 OK
+rag_mcq_cuda  | INFO:     172.18.0.1:59866 - "GET /openapi.json HTTP/1.1" 200 OK
+rag_mcq_cuda  |
+rag_mcq_cuda  | A module that was compiled using NumPy 1.x cannot be run in
+rag_mcq_cuda  | NumPy 2.2.2 as it may crash. To support both 1.x and 2.x
+rag_mcq_cuda  | versions of NumPy, modules must be compiled with NumPy 2.0.
+rag_mcq_cuda  | Some module may need to rebuild instead e.g. with 'pybind11>=2.12'.
+rag_mcq_cuda  |
+rag_mcq_cuda  | If you are a user of the module, the easiest solution will be to
+rag_mcq_cuda  | downgrade to 'numpy<2' or try to upgrade the affected module.
+rag_mcq_cuda  | We expect that some modules will need time to support NumPy 2.
+rag_mcq_cuda  |
+rag_mcq_cuda  | Traceback (most recent call last):  File "<string>", line 1, in <module>
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/multiprocessing/spawn.py", line 122, in spawn_main
+rag_mcq_cuda  |     exitcode = _main(fd, parent_sentinel)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/multiprocessing/spawn.py", line 135, in _main
+rag_mcq_cuda  |     return self._bootstrap(parent_sentinel)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/multiprocessing/process.py", line 314, in _bootstrap
+rag_mcq_cuda  |     self.run()
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/multiprocessing/process.py", line 108, in run
+rag_mcq_cuda  |     self._target(*self._args, **self._kwargs)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+rag_mcq_cuda  |     target(sockets=sockets)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/uvicorn/server.py", line 67, in run
+rag_mcq_cuda  |     return asyncio.run(self.serve(sockets=sockets))
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/asyncio/runners.py", line 190, in run
+rag_mcq_cuda  |     return runner.run(main)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/asyncio/runners.py", line 118, in run
+rag_mcq_cuda  |     return self._loop.run_until_complete(task)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/uvicorn/protocols/http/httptools_impl.py", line 409, in run_asgi
+rag_mcq_cuda  |     result = await app(  # type: ignore[func-returns-value]
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+rag_mcq_cuda  |     return await self.app(scope, receive, send)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/fastapi/applications.py", line 1054, in __call__
+rag_mcq_cuda  |     await super().__call__(scope, receive, send)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/starlette/applications.py", line 113, in __call__
+rag_mcq_cuda  |     await self.middleware_stack(scope, receive, send)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/starlette/middleware/errors.py", line 164, in __call__
+rag_mcq_cuda  |     await self.app(scope, receive, _send)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+rag_mcq_cuda  |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+rag_mcq_cuda  |     await app(scope, receive, sender)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/starlette/routing.py", line 716, in __call__
+rag_mcq_cuda  |     await self.middleware_stack(scope, receive, send)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/starlette/routing.py", line 736, in app
+rag_mcq_cuda  |     await route.handle(scope, receive, send)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/starlette/routing.py", line 290, in handle
+rag_mcq_cuda  |     await self.app(scope, receive, send)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/starlette/routing.py", line 78, in app
+rag_mcq_cuda  |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+rag_mcq_cuda  |     await app(scope, receive, sender)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/starlette/routing.py", line 75, in app
+rag_mcq_cuda  |     response = await f(request)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/fastapi/routing.py", line 302, in app
+rag_mcq_cuda  |     raw_response = await run_endpoint_function(
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/fastapi/routing.py", line 213, in run_endpoint_function
+rag_mcq_cuda  |     return await dependant.call(**values)
+rag_mcq_cuda  |   File "/app/app.py", line 99, in mcq_gen
+rag_mcq_cuda  |     generator.build_vector_database(docs)
+rag_mcq_cuda  |   File "/app/enhanced_rag_mcq.py", line 537, in build_vector_database
+rag_mcq_cuda  |     self.vector_db = FAISS.from_documents(chunks, embedding=self.embeddings)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/langchain_core/vectorstores/base.py", line 848, in from_documents
+rag_mcq_cuda  |     return cls.from_texts(texts, embedding, metadatas=metadatas, **kwargs)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/langchain_community/vectorstores/faiss.py", line 1044, in from_texts
+rag_mcq_cuda  |     return cls.__from(
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/langchain_community/vectorstores/faiss.py", line 996, in __from
+rag_mcq_cuda  |     faiss = dependable_faiss_import()
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/langchain_community/vectorstores/faiss.py", line 56, in dependable_faiss_import
+rag_mcq_cuda  |     import faiss
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/faiss/__init__.py", line 16, in <module>
+rag_mcq_cuda  |     from .loader import *
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/faiss/loader.py", line 55, in <module>
+rag_mcq_cuda  |     from .swigfaiss_avx2 import *
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/faiss/swigfaiss_avx2.py", line 13, in <module>
+rag_mcq_cuda  |     from . import _swigfaiss_avx2
+rag_mcq_cuda  | AttributeError: _ARRAY_API not found
+rag_mcq_cuda  |
+rag_mcq_cuda  | A module that was compiled using NumPy 1.x cannot be run in
+rag_mcq_cuda  | NumPy 2.2.2 as it may crash. To support both 1.x and 2.x
+rag_mcq_cuda  | versions of NumPy, modules must be compiled with NumPy 2.0.
+rag_mcq_cuda  | Some module may need to rebuild instead e.g. with 'pybind11>=2.12'.
+rag_mcq_cuda  |
+rag_mcq_cuda  | If you are a user of the module, the easiest solution will be to
+rag_mcq_cuda  | downgrade to 'numpy<2' or try to upgrade the affected module.
+rag_mcq_cuda  | We expect that some modules will need time to support NumPy 2.
+rag_mcq_cuda  |
+rag_mcq_cuda  | Traceback (most recent call last):  File "<string>", line 1, in <module>
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/multiprocessing/spawn.py", line 122, in spawn_main
+rag_mcq_cuda  |     exitcode = _main(fd, parent_sentinel)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/multiprocessing/spawn.py", line 135, in _main
+rag_mcq_cuda  |     return self._bootstrap(parent_sentinel)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/multiprocessing/process.py", line 314, in _bootstrap
+rag_mcq_cuda  |     self.run()
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/multiprocessing/process.py", line 108, in run
+rag_mcq_cuda  |     self._target(*self._args, **self._kwargs)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+rag_mcq_cuda  |     target(sockets=sockets)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/uvicorn/server.py", line 67, in run
+rag_mcq_cuda  |     return asyncio.run(self.serve(sockets=sockets))
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/asyncio/runners.py", line 190, in run
+rag_mcq_cuda  |     return runner.run(main)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/asyncio/runners.py", line 118, in run
+rag_mcq_cuda  |     return self._loop.run_until_complete(task)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/uvicorn/protocols/http/httptools_impl.py", line 409, in run_asgi
+rag_mcq_cuda  |     result = await app(  # type: ignore[func-returns-value]
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+rag_mcq_cuda  |     return await self.app(scope, receive, send)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/fastapi/applications.py", line 1054, in __call__
+rag_mcq_cuda  |     await super().__call__(scope, receive, send)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/starlette/applications.py", line 113, in __call__
+rag_mcq_cuda  |     await self.middleware_stack(scope, receive, send)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/starlette/middleware/errors.py", line 164, in __call__
+rag_mcq_cuda  |     await self.app(scope, receive, _send)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+rag_mcq_cuda  |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+rag_mcq_cuda  |     await app(scope, receive, sender)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/starlette/routing.py", line 716, in __call__
+rag_mcq_cuda  |     await self.middleware_stack(scope, receive, send)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/starlette/routing.py", line 736, in app
+rag_mcq_cuda  |     await route.handle(scope, receive, send)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/starlette/routing.py", line 290, in handle
+rag_mcq_cuda  |     await self.app(scope, receive, send)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/starlette/routing.py", line 78, in app
+rag_mcq_cuda  |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+rag_mcq_cuda  |     await app(scope, receive, sender)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/starlette/routing.py", line 75, in app
+rag_mcq_cuda  |     response = await f(request)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/fastapi/routing.py", line 302, in app
+rag_mcq_cuda  |     raw_response = await run_endpoint_function(
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/fastapi/routing.py", line 213, in run_endpoint_function
+rag_mcq_cuda  |     return await dependant.call(**values)
+rag_mcq_cuda  |   File "/app/app.py", line 99, in mcq_gen
+rag_mcq_cuda  |     generator.build_vector_database(docs)
+rag_mcq_cuda  |   File "/app/enhanced_rag_mcq.py", line 537, in build_vector_database
+rag_mcq_cuda  |     self.vector_db = FAISS.from_documents(chunks, embedding=self.embeddings)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/langchain_core/vectorstores/base.py", line 848, in from_documents
+rag_mcq_cuda  |     return cls.from_texts(texts, embedding, metadatas=metadatas, **kwargs)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/langchain_community/vectorstores/faiss.py", line 1044, in from_texts
+rag_mcq_cuda  |     return cls.__from(
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/langchain_community/vectorstores/faiss.py", line 996, in __from
+rag_mcq_cuda  |     faiss = dependable_faiss_import()
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/langchain_community/vectorstores/faiss.py", line 56, in dependable_faiss_import
+rag_mcq_cuda  |     import faiss
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/faiss/__init__.py", line 16, in <module>
+rag_mcq_cuda  |     from .loader import *
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/faiss/loader.py", line 65, in <module>
+rag_mcq_cuda  |     from .swigfaiss import *
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/faiss/swigfaiss.py", line 13, in <module>
+rag_mcq_cuda  |     from . import _swigfaiss
+rag_mcq_cuda  | AttributeError: _ARRAY_API not found
+rag_mcq_cuda  | ✅ Loaded Applied_Statistic_in_ComputerVision.pdf (30 pages)
+rag_mcq_cuda  | ✅ Loaded M1W3D3+4_OOP.pdf (10 pages)
+rag_mcq_cuda  | ✅ Loaded oop.pdf (10 pages)
+rag_mcq_cuda  | INFO:     172.18.0.1:46602 - "POST /generate/ HTTP/1.1" 500 Internal Server Error
+rag_mcq_cuda  | INFO:     172.18.0.1:44252 - "GET /docs HTTP/1.1" 200 OK
+rag_mcq_cuda  | INFO:     172.18.0.1:44252 - "GET /openapi.json HTTP/1.1" 200 OK
+rag_mcq_cuda  |
+rag_mcq_cuda  | A module that was compiled using NumPy 1.x cannot be run in
+rag_mcq_cuda  | NumPy 2.2.2 as it may crash. To support both 1.x and 2.x
+rag_mcq_cuda  | versions of NumPy, modules must be compiled with NumPy 2.0.
+rag_mcq_cuda  | Some module may need to rebuild instead e.g. with 'pybind11>=2.12'.
+rag_mcq_cuda  |
+rag_mcq_cuda  | If you are a user of the module, the easiest solution will be to
+rag_mcq_cuda  | downgrade to 'numpy<2' or try to upgrade the affected module.
+rag_mcq_cuda  | We expect that some modules will need time to support NumPy 2.
+rag_mcq_cuda  |
+rag_mcq_cuda  | Traceback (most recent call last):  File "<string>", line 1, in <module>
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/multiprocessing/spawn.py", line 122, in spawn_main
+rag_mcq_cuda  |     exitcode = _main(fd, parent_sentinel)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/multiprocessing/spawn.py", line 135, in _main
+rag_mcq_cuda  |     return self._bootstrap(parent_sentinel)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/multiprocessing/process.py", line 314, in _bootstrap
+rag_mcq_cuda  |     self.run()
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/multiprocessing/process.py", line 108, in run
+rag_mcq_cuda  |     self._target(*self._args, **self._kwargs)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+rag_mcq_cuda  |     target(sockets=sockets)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/uvicorn/server.py", line 67, in run
+rag_mcq_cuda  |     return asyncio.run(self.serve(sockets=sockets))
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/asyncio/runners.py", line 190, in run
+rag_mcq_cuda  |     return runner.run(main)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/asyncio/runners.py", line 118, in run
+rag_mcq_cuda  |     return self._loop.run_until_complete(task)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/uvicorn/protocols/http/httptools_impl.py", line 409, in run_asgi
+rag_mcq_cuda  |     result = await app(  # type: ignore[func-returns-value]
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+rag_mcq_cuda  |     return await self.app(scope, receive, send)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/fastapi/applications.py", line 1054, in __call__
+rag_mcq_cuda  |     await super().__call__(scope, receive, send)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/starlette/applications.py", line 113, in __call__
+rag_mcq_cuda  |     await self.middleware_stack(scope, receive, send)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/starlette/middleware/errors.py", line 164, in __call__
+rag_mcq_cuda  |     await self.app(scope, receive, _send)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+rag_mcq_cuda  |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+rag_mcq_cuda  |     await app(scope, receive, sender)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/starlette/routing.py", line 716, in __call__
+rag_mcq_cuda  |     await self.middleware_stack(scope, receive, send)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/starlette/routing.py", line 736, in app
+rag_mcq_cuda  |     await route.handle(scope, receive, send)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/starlette/routing.py", line 290, in handle
+rag_mcq_cuda  |     await self.app(scope, receive, send)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/starlette/routing.py", line 78, in app
+rag_mcq_cuda  |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+rag_mcq_cuda  |     await app(scope, receive, sender)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/starlette/routing.py", line 75, in app
+rag_mcq_cuda  |     response = await f(request)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/fastapi/routing.py", line 302, in app
+rag_mcq_cuda  |     raw_response = await run_endpoint_function(
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/fastapi/routing.py", line 213, in run_endpoint_function
+rag_mcq_cuda  |     return await dependant.call(**values)
+rag_mcq_cuda  |   File "/app/app.py", line 99, in mcq_gen
+rag_mcq_cuda  |     generator.build_vector_database(docs)
+rag_mcq_cuda  |   File "/app/enhanced_rag_mcq.py", line 537, in build_vector_database
+rag_mcq_cuda  |     self.vector_db = FAISS.from_documents(chunks, embedding=self.embeddings)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/langchain_core/vectorstores/base.py", line 848, in from_documents
+rag_mcq_cuda  |     return cls.from_texts(texts, embedding, metadatas=metadatas, **kwargs)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/langchain_community/vectorstores/faiss.py", line 1044, in from_texts
+rag_mcq_cuda  |     return cls.__from(
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/langchain_community/vectorstores/faiss.py", line 996, in __from
+rag_mcq_cuda  |     faiss = dependable_faiss_import()
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/langchain_community/vectorstores/faiss.py", line 56, in dependable_faiss_import
+rag_mcq_cuda  |     import faiss
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/faiss/__init__.py", line 16, in <module>
+rag_mcq_cuda  |     from .loader import *
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/faiss/loader.py", line 55, in <module>
+rag_mcq_cuda  |     from .swigfaiss_avx2 import *
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/faiss/swigfaiss_avx2.py", line 13, in <module>
+rag_mcq_cuda  |     from . import _swigfaiss_avx2
+rag_mcq_cuda  | AttributeError: _ARRAY_API not found
+rag_mcq_cuda  |
+rag_mcq_cuda  | A module that was compiled using NumPy 1.x cannot be run in
+rag_mcq_cuda  | NumPy 2.2.2 as it may crash. To support both 1.x and 2.x
+rag_mcq_cuda  | versions of NumPy, modules must be compiled with NumPy 2.0.
+rag_mcq_cuda  | Some module may need to rebuild instead e.g. with 'pybind11>=2.12'.
+rag_mcq_cuda  |
+rag_mcq_cuda  | If you are a user of the module, the easiest solution will be to
+rag_mcq_cuda  | downgrade to 'numpy<2' or try to upgrade the affected module.
+rag_mcq_cuda  | We expect that some modules will need time to support NumPy 2.
+rag_mcq_cuda  |
+rag_mcq_cuda  | Traceback (most recent call last):  File "<string>", line 1, in <module>
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/multiprocessing/spawn.py", line 122, in spawn_main
+rag_mcq_cuda  |     exitcode = _main(fd, parent_sentinel)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/multiprocessing/spawn.py", line 135, in _main
+rag_mcq_cuda  |     return self._bootstrap(parent_sentinel)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/multiprocessing/process.py", line 314, in _bootstrap
+rag_mcq_cuda  |     self.run()
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/multiprocessing/process.py", line 108, in run
+rag_mcq_cuda  |     self._target(*self._args, **self._kwargs)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/uvicorn/_subprocess.py", line 80, in subprocess_started
+rag_mcq_cuda  |     target(sockets=sockets)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/uvicorn/server.py", line 67, in run
+rag_mcq_cuda  |     return asyncio.run(self.serve(sockets=sockets))
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/asyncio/runners.py", line 190, in run
+rag_mcq_cuda  |     return runner.run(main)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/asyncio/runners.py", line 118, in run
+rag_mcq_cuda  |     return self._loop.run_until_complete(task)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/uvicorn/protocols/http/httptools_impl.py", line 409, in run_asgi
+rag_mcq_cuda  |     result = await app(  # type: ignore[func-returns-value]
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+rag_mcq_cuda  |     return await self.app(scope, receive, send)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/fastapi/applications.py", line 1054, in __call__
+rag_mcq_cuda  |     await super().__call__(scope, receive, send)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/starlette/applications.py", line 113, in __call__
+rag_mcq_cuda  |     await self.middleware_stack(scope, receive, send)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/starlette/middleware/errors.py", line 164, in __call__
+rag_mcq_cuda  |     await self.app(scope, receive, _send)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+rag_mcq_cuda  |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+rag_mcq_cuda  |     await app(scope, receive, sender)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/starlette/routing.py", line 716, in __call__
+rag_mcq_cuda  |     await self.middleware_stack(scope, receive, send)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/starlette/routing.py", line 736, in app
+rag_mcq_cuda  |     await route.handle(scope, receive, send)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/starlette/routing.py", line 290, in handle
+rag_mcq_cuda  |     await self.app(scope, receive, send)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/starlette/routing.py", line 78, in app
+rag_mcq_cuda  |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+rag_mcq_cuda  |     await app(scope, receive, sender)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/starlette/routing.py", line 75, in app
+rag_mcq_cuda  |     response = await f(request)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/fastapi/routing.py", line 302, in app
+rag_mcq_cuda  |     raw_response = await run_endpoint_function(
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/fastapi/routing.py", line 213, in run_endpoint_function
+rag_mcq_cuda  |     return await dependant.call(**values)
+rag_mcq_cuda  |   File "/app/app.py", line 99, in mcq_gen
+rag_mcq_cuda  |     generator.build_vector_database(docs)
+rag_mcq_cuda  |   File "/app/enhanced_rag_mcq.py", line 537, in build_vector_database
+rag_mcq_cuda  |     self.vector_db = FAISS.from_documents(chunks, embedding=self.embeddings)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/langchain_core/vectorstores/base.py", line 848, in from_documents
+rag_mcq_cuda  |     return cls.from_texts(texts, embedding, metadatas=metadatas, **kwargs)
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/langchain_community/vectorstores/faiss.py", line 1044, in from_texts
+rag_mcq_cuda  |     return cls.__from(
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/langchain_community/vectorstores/faiss.py", line 996, in __from
+rag_mcq_cuda  |     faiss = dependable_faiss_import()
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/langchain_community/vectorstores/faiss.py", line 56, in dependable_faiss_import
+rag_mcq_cuda  |     import faiss
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/faiss/__init__.py", line 16, in <module>
+rag_mcq_cuda  |     from .loader import *
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/faiss/loader.py", line 65, in <module>
+rag_mcq_cuda  |     from .swigfaiss import *
+rag_mcq_cuda  |   File "/opt/conda/lib/python3.11/site-packages/faiss/swigfaiss.py", line 13, in <module>
+rag_mcq_cuda  |     from . import _swigfaiss
+rag_mcq_cuda  | AttributeError: _ARRAY_API not found
+rag_mcq_cuda  | ✅ Loaded Applied_Statistic_in_ComputerVision.pdf (30 pages)
+rag_mcq_cuda  | ✅ Loaded M1W3D3+4_OOP.pdf (10 pages)
+rag_mcq_cuda  | ✅ Loaded oop.pdf (10 pages)
+rag_mcq_cuda  | INFO:     172.18.0.1:55272 - "POST /generate/ HTTP/1.1" 500 Internal Server Error
+rag_mcq_cuda  | INFO:     Shutting down
+rag_mcq_cuda  | INFO:     Waiting for application shutdown.
+rag_mcq_cuda  | INFO:     Application shutdown complete.
+rag_mcq_cuda  | INFO:     Finished server process [28]
+rag_mcq_cuda  | INFO:     Stopping reloader process [1]
+rag_mcq_cuda exited with code 0

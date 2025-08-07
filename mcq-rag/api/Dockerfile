@@ -1,51 +1,41 @@
-#? Stage 1: Build with Python 3.11 and CUDA support
-FROM pytorch/pytorch:2.1.2-cuda12.1-cudnn8-runtime
+#? Base image: PyTorch with CUDA 12.1, cuDNN8, Python 3.11, development tools
+FROM pytorch/pytorch:2.6.0-cuda12.6-cudnn9-devel
 
-# Set non-interactive mode for APT
+# Avoids interactive prompts
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install dependencies: Python, curl, etc.
+# Install OS-level dependencies
 RUN apt-get update && apt-get install -y \
     git \
     curl \
+    build-essential \
+    cmake \
     libgl1 \
-    python3.11 \
-    python3.11-venv \
-    python3.11-distutils \
-    python3-pip \
-&& apt-get clean \
-&& rm -rf /var/lib/apt/lists/*
-
-# Set Python 3.11 as default
-RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.11 1
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Upgrade pip
-RUN python -m pip install --upgrade pip
+RUN pip install --upgrade pip
 
-#? Stage 2: App installation
-# Ensure pipx and uv is install
-RUN python -m pip install pipx && \
-    pipx install uv && \
-    ln -s /root/.local/bin/uv /usr/local/bin/uv
-
-# Make sure uv is in PATH (adjust if needed)
-ENV PATH="/root/.local/bin:${PATH}"
-
+# Set working directory
 WORKDIR /app
 
-# Copy files within requirements folder
-COPY requirements/ ./requirements/
-# Pre-download wheels
-RUN uv pip download -r requirements/prod.txt -d ./wheels && \
-    uv pip install --system --no-index --find-links=./wheels -r requirements/prod.txt
+# Copy requirements folder and install dependencies
+COPY requirements.txt
 
-# Copy the rest of the code
+# Download wheels for caching
+RUN pip download --no-cache-dir -r requirements.txt -d ./wheels
+
+# Install from local wheels using pip (not uv to avoid errors)
+RUN pip install --no-cache-dir --no-index --find-links=./wheels -r requirements.txt
+
+# Copy the rest of the application code
 COPY . .
 
-# Set environment variable for GPU use (optional)
+# Optional: suppress transformer warnings
 ENV TRANSFORMERS_NO_ADVISORY_WARNINGS=true
 
+# Expose FastAPI port
 EXPOSE 8000
 
-# Run the app
+# Run app using uvicorn
 CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]

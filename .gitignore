@@ -2,6 +2,5 @@ __pycache__
 .vscode
 LangChain/langchain-course
 Testing
-mcq-rag/api/tokens
+mcq-rag/api/tokens/*
 mcq-rag/api/unsloth_compiled_cache
-mcq-rag/api/tmp

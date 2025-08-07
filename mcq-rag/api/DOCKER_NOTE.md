@@ -107,28 +107,28 @@ CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "
 
 ### Building the Image
 ```bash
-docker build -t heval1st/enhanced-rag-mcq:lastest .
+docker build -t heval1st/enhanced-rag-mcq:local .
 ```
 - **docker build**: Command to build an image from Dockerfile
-- **-t enhanced-rag-mcq:latest**: Tags the image with name and version
+- **-t enhanced-rag-mcq:local**: Tags the image with name and version
   - **-t**: Short for --tag
   - **enhanced-rag-mcq**: Image name
-  - **latest**: Tag (version)
+  - **local**: Tag (version)
 - **.**: Build context (current directory)
 
 ### Running the Container
 ```bash
-docker run -p 8000:8000 heval1st/enhanced-rag-mcq:lastest
+docker run -p 8000:8000 heval1st/enhanced-rag-mcq:local
 ```
 - **docker run**: Command to create and start a container
 - **-p 8000:8000**: Port mapping
   - **-p**: Short for --publish
   - **8000:8000**: host_port:container_port
-- **enhanced-rag-mcq:latest**: Image to run
+- **enhanced-rag-mcq:local**: Image to run
 
 ### Additional Run Flags
 ```bash
-docker run -d -p 8000:8000 --name mcq-api enhanced-rag-mcq:latest
+docker run -d -p 8000:8000 --name mcq-api enhanced-rag-mcq:local
 ```
 - **-d**: Run in detached mode (background)
 - **--name mcq-api**: Assign a name to the container
@@ -190,10 +190,10 @@ docker system prune
 ### Debug Commands
 ```bash
 # Build with verbose output
-docker build --no-cache -t enhanced-rag-mcq:latest .
+docker build --no-cache -t enhanced-rag-mcq:local .
 
 # Run container in interactive mode
-docker run -it enhanced-rag-mcq:latest /bin/bash
+docker run -it enhanced-rag-mcq:local /bin/bash
 
 # Check container resource usage
 docker stats <container-id>
@@ -202,8 +202,8 @@ docker stats <container-id>
 ## Development Workflow
 
 1. **Development**: Make changes to source code
-2. **Build**: `docker build -t enhanced-rag-mcq:latest .`
-3. **Test**: `docker run -p 8000:8000 enhanced-rag-mcq:latest`
+2. **Build**: `docker build -t enhanced-rag-mcq:local .`
+3. **Test**: `docker run -p 8000:8000 enhanced-rag-mcq:local`
 4. **Verify**: Test API endpoints
 5. **Deploy**: Push to registry if needed
 
