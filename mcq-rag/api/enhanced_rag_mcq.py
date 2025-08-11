@@ -756,15 +756,14 @@ class EnhancedRAGMCQGenerator:
         elapsed = time.time() - start_t
         print(f"⏱ LLM batch time: {elapsed:.2f}s for {total} prompts")
 
-        # Parse each raw response back into MCQQuestion objects using the
-        # original parsing routine (keeps behaviour identical).
+        # Parse raw responses back into MCQQuestion objects
         mcqs = []
         for meta, response in zip(prompt_metadatas, raw_responses):
             topic, difficulty, question_type = meta
             try:
                 response_data = self._extract_json_from_response(response)
 
-                # reconstruct MCQQuestion using the same fields as original
+                # Reconstruct MCQQuestion
                 options = []
                 for label, text in response_data["options"].items():
                     is_correct = label == response_data["correct_answer"]
@@ -780,7 +779,7 @@ class EnhancedRAGMCQGenerator:
                     question_type=(question_type if hasattr(question_type, 'name') else question_type),
                     confidence_score=response_data.get("confidence_score", 0.0)
                 )
-                # preserve any validation that used to run in generate_mcq
+
                 if hasattr(self, 'validator'):
                     mcq = self.validator.calculate_quality_score(mcq)
 
