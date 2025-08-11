@@ -1,135 +1,161 @@
-import time
-from enhanced_rag_mcq import EnhancedRAGMCQGenerator, debug_prompt_templates, DifficultyLevel, QuestionType
-import numpy as np
-import os
-import shutil
-from pydantic import BaseModel, Field
-from typing import List, Optional, Dict
-from fastapi import FastAPI, Form, HTTPException, UploadFile, File
-from contextlib import asynccontextmanager
+import gradio as gr
+import json
+from fastapi.testclient import TestClient
+from fastapi_app import app as fastapi_app  # import your renamed FastAPI module
+import io
 
+# In-process client for the FastAPI app
+client = TestClient(fastapi_app)
 
-generator: Optional[EnhancedRAGMCQGenerator] = None
-tmp_folder = "./tmp" #? make sure folder upload here
-if not os.path.exists(tmp_folder):
-    os.makedirs(tmp_folder)
+def read_file_input(file_obj):
+    if file_obj is None:
+        return None
 
-class GenerateRequest(BaseModel):
-    topics: List[str] = Field(..., description="List of topics for MCQ generation")
-    question_per_topic: int = Field(1, ge=1, le=10, description="Number of questions per topic")
-    difficulty: Optional[DifficultyLevel] = Field(
-        DifficultyLevel.MEDIUM,
-        description="Difficulty level for generated questions"
-    )
-    qtype: Optional[QuestionType] = Field(
-        QuestionType.DEFINITION,
-        description="Type of question to generate"
-    )
+    # file-like object (has read)
+    if hasattr(file_obj, "read"):
+        try:
+            file_obj.seek(0)
+        except Exception:
+            pass
+        try:
+            data = file_obj.read()
+            # If read returns str (rare), encode it
+            if isinstance(data, str):
+                return data.encode()
+            return data
+        except Exception:
+            # continue to other strategies
+            pass
 
-class MCQResponse(BaseModel):
-    question: str
-    options: Dict
-    correct_answer: str
-    confidence_score: float
+    # raw bytes
+    if isinstance(file_obj, (bytes, bytearray)):
+        return bytes(file_obj)
 
-class GenerateResponse(BaseModel):
-    topics: List[str]
-    generated: List[MCQResponse]
-    avg_confidence: float
-    generation_time: float
+    # path string (local path)
+    if isinstance(file_obj, str):
+        try:
+            with open(file_obj, "rb") as f:
+                return f.read()
+        except Exception:
+            # not a path, fall through to try encoding string
+            return file_obj.encode()
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    global generator
-    generator = EnhancedRAGMCQGenerator()
+    # dict-like (old Gradio or different frontends)
     try:
-        generator.initialize_system()
-        print("RAG system initialized.")
+        if isinstance(file_obj, dict):
+            # common keys: "name", "data"
+            if "data" in file_obj:
+                data = file_obj["data"]
+                if isinstance(data, (bytes, bytearray)):
+                    return bytes(data)
+                if isinstance(data, str):
+                    return data.encode()
+            if "name" in file_obj:
+                maybe_path = file_obj["name"]
+                if isinstance(maybe_path, str):
+                    try:
+                        with open(maybe_path, "rb") as f:
+                            return f.read()
+                    except Exception:
+                        pass
+    except Exception:
+        pass
+
+    # Object with attributes (NamedString with .name/.value)
+    try:
+        name = getattr(file_obj, "name", None)
+        data = getattr(file_obj, "data", None)
+        value = getattr(file_obj, "value", None)
+        if isinstance(data, (bytes, bytearray)):
+            return bytes(data)
+        if isinstance(value, (bytes, bytearray)):
+            return bytes(value)
+        if isinstance(value, str):
+            return value.encode()
+        if isinstance(name, str):
+            try:
+                with open(name, "rb") as f:
+                    return f.read()
+            except Exception:
+                pass
+    except Exception:
+        pass
+
+    # String representation encoded
+    try:
+        return str(file_obj).encode()
+    except Exception:
+        return None
+
+def call_generate(file_obj, topics, n_questions, difficulty, question_type):
+    if file_obj is None:
+        return {"error": "No file uploaded."}
+
+    # Read the uploaded file bytes and create multipart payload
+    file_bytes = read_file_input(file_obj)
+    if not file_bytes:
+        return {"error": "Could not read uploaded file (empty or unknown format)."}
+    files = {"file": ("uploaded_file", file_bytes, "application/octet-stream")}
+
+    print(files)
+
+    data = {
+        "topics": topics if topics is not None else "",
+        "n_questions": str(n_questions),
+        "difficulty": difficulty if difficulty is not None else "",
+        "question_type": question_type if question_type is not None else ""
+    }
+
+    try:
+        resp = client.post("/generate/", files=files, data=data, timeout=120)  # increase timeout if needed
     except Exception as e:
-        print(f"❌ Failed to initialize RAG system: {e}")
-    yield
-    # Optional: Cleanup code after shutdown
+        return {"error": f"Request failed: {e}"}
+    
+    print(resp.status_code)
 
-app = FastAPI(
-    title="Enhanced RAG MCQ Generation API",
-    description="An API wrapping the RAG-based MCQ generator using FastAPI",
-    version="1.0.0",
-    lifespan=lifespan
-)
+    if resp.status_code != 200:
+        # return helpful debug info
+        return {
+            "status_code": resp.status_code,
+            "text": resp.text,
+            "json": None
+        }
+    
+    # print(resp.text)
 
-#? cmd: fastapi run app.py
-@app.post("/generate/")
-async def mcq_gen(
-    file: UploadFile = File(...),
-    topics: str = Form(...),
-    n_questions: str = Form(...),
-    difficulty: str = Form(...),
-    qtype: str = Form(...)
-):
-    if not generator:
-        raise HTTPException(status_code=500, detail="Generator not initialized")
-
-    topic_list = [t.strip() for t in topics.split(',') if t.strip()]
-    if not topic_list:
-        raise HTTPException(status_code=400, detail="At least one topic must be provided")
-
-    # Validate and convert enum values
+    # Parse JSON response
     try:
-        difficulty_enum = DifficultyLevel(difficulty.lower())
-    except ValueError:
-        valid_difficulties = [d.value for d in DifficultyLevel]
-        raise HTTPException(status_code=400, detail=f"Invalid difficulty. Must be one of: {valid_difficulties}")
+        out = resp.json()
+    except Exception:
+        # maybe the endpoint returns text: return it directly
+        return {"text": resp.text}
 
-    try:
-        qtype_enum = QuestionType(qtype.lower())
-    except ValueError:
-        valid_types = [q.value for q in QuestionType]
-        raise HTTPException(status_code=400, detail=f"Invalid question type. Must be one of: {valid_types}")
+    # pretty-format the JSON for display
+    return out
 
-    # Save uploaded PDF to temporary folder
-    filename = file.filename if file.filename else "uploaded_file"
-    file_path = os.path.join(tmp_folder, filename)
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-    file.file.close()
+# Gradio UI
+with gr.Blocks(title="RAG MCQ generator") as gradio_app:
+    gr.Markdown("## Upload a file and generate MCQs")
 
-    try:
-        # Load and index the uploaded document
-        docs, _ = generator.load_documents(tmp_folder)
-        generator.build_vector_database(docs)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Document processing error: {e}")
+    with gr.Row():
+        file_input = gr.File(label="Upload file (PDF, docx, etc)", type="filepath", file_types=[".pdf"])
+        topics = gr.Textbox(label="Topics (comma separated)", placeholder="e.g. calculus, derivatives")
+    with gr.Row():
+        n_questions = gr.Slider(minimum=1, maximum=50, step=1, value=5, label="Number of questions")
+        difficulty = gr.Dropdown(choices=["easy", "medium", "hard"], value="medium", label="Difficulty")
+        question_type = gr.Dropdown(choices=["mcq", "short", "long"], value="mcq", label="Question type")
 
-    start_time = time.time()
-    try:
-        mcqs = generator.generate_batch(
-            topics=topic_list,
-            question_per_topic=int(n_questions),
-            difficulties=[difficulty_enum],
-            question_types=[qtype_enum]
-        )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-    end_time = time.time()
+    generate_btn = gr.Button("Generate")
+    output = gr.JSON(label="Response")
 
-    res_dict = [m.to_dict() for m in mcqs]
-
-    responses = [
-        MCQResponse(
-            question=m["question"],
-            options=m["options"],
-            correct_answer=m["correct_answer"],
-            confidence_score=m["confidence_score"]
-        ) for m in res_dict
-    ]
-    avg_conf = sum(m["confidence_score"] for m in res_dict) / len(mcqs)
-    # Clean up temporary files
-    shutil.rmtree(tmp_folder)
-    os.makedirs(tmp_folder)
-
-    return GenerateResponse(
-        topics=topic_list,
-        generated=responses,
-        avg_confidence=avg_conf,
-        generation_time=end_time - start_time
+    generate_btn.click(
+        fn=call_generate,
+        inputs=[file_input, topics, n_questions, difficulty, question_type],
+        outputs=[output],
     )
+
+app = gradio_app
+
+if __name__ == "__main__":
+    # gradio_app.launch(server_name="0.0.0.0", server_port=7860, share=False)
+    gradio_app.launch()
