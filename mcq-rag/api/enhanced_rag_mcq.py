@@ -17,6 +17,8 @@ from dataclasses import dataclass, asdict
 from pathlib import Path
 from enum import Enum
 import numpy as np
+import faiss
+import hashlib
 
 # LangChain imports
 from langchain_community.document_loaders import PyPDFLoader
@@ -34,6 +36,7 @@ from langchain_core.documents import Document
 from transformers import (
     AutoModelForCausalLM,
     AutoTokenizer,
+    AutoModel,
 )
 from transformers.pipelines import pipeline
 from transformers.utils.quantization_config import BitsAndBytesConfig
@@ -319,6 +322,29 @@ class ContextAwareRetriever:
         union = words1.union(words2)
 
         return len(intersection) / len(union)
+    
+
+class LLMWrapper:
+    """Small wrapper around HF text-generation pipeline to expose batch/single invocation."""
+    def __init__(self, hf_pipeline):
+        self.pipeline = hf_pipeline
+
+    def invoke(self, prompt: str) -> str:
+        # pipeline returns list of dicts if list input, or dict if single
+        out = self.pipeline(prompt, return_full_text=False)
+        if isinstance(out, list):
+            return out[0]["generated_text"]
+        return out["generated_text"]
+
+    def invoke_batch(self, prompts: List[str]) -> List[str]:
+        # pass list and return list of generated_text
+        outs = self.pipeline(prompts, return_full_text=False)
+        results = []
+        # pipeline returns list of dicts
+        for o in outs:
+            text = o.get("generated_text") or o.get("text") or ""
+            results.append(text)
+        return results
 
 
 class EnhancedRAGMCQGenerator:
@@ -333,6 +359,24 @@ class EnhancedRAGMCQGenerator:
         self.prompt_manager = PromptTemplateManager()
         self.validator = QualityValidator()
         self.difficulty_analyzer = DifficultyAnalyzer()
+
+    def _timeit(self, label, start_time):
+        elapsed = time.time() - start_time
+        print(f"[TIMING] {label}: {elapsed:.2f}s")
+        return time.time()
+    
+    def _embed_texts(self, texts: List[str]) -> np.ndarray:
+        """Run embedding model once for a list of texts (batch) and return numpy array."""
+        # Adapt to your embedding model API. Example for HF encoder: mean pool last hidden state.
+        tokens = self.emb_tokenizer(texts, padding=True, truncation=True, return_tensors="pt").to(self.device)
+        with torch.no_grad():
+            out = self.emb_model(**tokens)
+            last = out.last_hidden_state  # (B, L, D)
+            mask = tokens['attention_mask'].unsqueeze(-1)
+            summed = (last * mask).sum(1)
+            lens = mask.sum(1)
+            embeddings = summed / lens
+        return embeddings.cpu().numpy()
 
     def _get_default_config(self) -> Dict[str, Any]:
         """Get default configuration"""
@@ -443,19 +487,64 @@ class EnhancedRAGMCQGenerator:
         is_safe = estimated_tokens <= max_safe_tokens
         return is_safe, estimated_tokens
 
-    def initialize_system(self):
-        """Initialize all system components"""
-        print("🔧 Initializing Enhanced RAG MCQ Generator...")
+    def initialize_system(self, persist_faiss_path: Optional[str] = "./faiss.index"):
+        """Initialize system and keep model/pipeline loaded. Optionally load persisted FAISS index."""
+        start = time.time()
+        print("🔧 Initializing (optimized) Enhanced RAG MCQ Generator...")
 
-        # Load embeddings
-        self.embeddings = HuggingFaceEmbeddings(
-            model_name=self.config["embedding_model"]
-        )
+        # embeddings (no change)
+        self.embeddings = HuggingFaceEmbeddings(model_name=self.config["embedding_model"])
         print("✅ Embeddings loaded")
 
-        # Load LLM
-        self.llm = self._load_llm()
-        print("✅ LLM loaded")
+        # Load LLM once and store low-level pipeline for batch calls
+        token_path = Path("./tokens/hf_token.txt")
+        hf_token = None
+        if token_path.exists():
+            hf_token = token_path.read_text().strip()
+
+        bnb_config = BitsAndBytesConfig(
+            load_in_4bit=True,
+            bnb_4bit_use_double_quant=True,
+            bnb_4bit_compute_dtype=torch.bfloat16,
+            bnb_4bit_quant_type="nf4"
+        )
+
+        model = AutoModelForCausalLM.from_pretrained(
+            self.config["llm_model"],
+            quantization_config=bnb_config,
+            low_cpu_mem_usage=True,
+            device_map="auto",
+            token=hf_token
+        )
+        tokenizer = AutoTokenizer.from_pretrained(self.config["llm_model"])
+        model_pipeline = pipeline(
+            "text-generation",
+            model=model,
+            tokenizer=tokenizer,
+            max_new_tokens=self.config["max_tokens"],
+            temperature=self.config["generation_temperature"],
+            pad_token_id=tokenizer.eos_token_id,
+            device_map="auto",
+            # set batch_size if supported by your version (helps throughput)
+        )
+        self.llm = LLMWrapper(model_pipeline)
+        print("✅ LLM pipeline loaded (supports batch)")
+
+        # Load or create FAISS index once and persist it
+        self.persist_faiss_path = persist_faiss_path
+        if Path(persist_faiss_path).exists():
+            try:
+                # READ persisted index via faiss (if using raw faiss index)
+                self.vector_db_index = faiss.read_index(persist_faiss_path)
+                print("✅ Loaded persisted FAISS index from", persist_faiss_path)
+            except Exception as e:
+                print("⚠️ Failed to load persisted FAISS index, will rebuild:", e)
+                self.vector_db_index = None
+        else:
+            self.vector_db_index = None
+
+        print(f"[TIMING] initialize_system: {time.time()-start:.2f}s")
+        return
 
     def _load_llm(self) -> HuggingFacePipeline:
         """Load and configure the LLM"""
@@ -495,6 +584,31 @@ class EnhancedRAGMCQGenerator:
         )
 
         return HuggingFacePipeline(pipeline=model_pipeline)
+    
+    def load_models(self, device=None):
+        """Load and reuse models (embedding encoder + LLM). Call once at startup."""
+        device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device(device)
+        print(f"Loading models on {self.device}...")
+
+        # Embedding model (example: sentence-transformers or HF model)
+        if self.embeddings is None:
+            emb_name = self.config.get("embedding_model")
+            self.emb_tokenizer = AutoTokenizer.from_pretrained(emb_name)
+            self.emb_model = AutoModel.from_pretrained(emb_name).to(self.device)
+            self.emb_model.eval()
+            # small helper for embedding inference below
+
+        # LLM (example uses transformers generate)
+        if self.llm is None:
+            llm_name = self.config.get("llm_model")
+            self.llm_tokenizer = AutoTokenizer.from_pretrained(llm_name, use_fast=True)
+            self.llm = AutoModelForCausalLM.from_pretrained(llm_name, torch_dtype=torch.float16 if self.device.type=="cuda" else torch.float32)
+            self.llm.to(self.device)
+            self.llm.eval()
+            # if CUDA, enable cudnn benchmark for small perf boost
+            if self.device.type == "cuda":
+                torch.backends.cudnn.benchmark = True
 
     def load_documents(self, folder_path: str) -> Tuple[List[Document], List[str]]:
         """Load and process documents"""
@@ -695,6 +809,116 @@ class EnhancedRAGMCQGenerator:
 
         print(f"🎉 Generated {len(mcqs)}/{total_questions} MCQs successfully")
         return mcqs
+    
+    def build_or_load_embeddings(self, doc_texts: List[str], cache_path="embeddings_cache.npz"):
+        """
+        Build or load cached embeddings for the given list of doc_texts.
+        doc_texts must be in deterministic order.
+        """
+        # create a quick fingerprint for the docs to detect changed docs
+        digest = hashlib.sha1("\n".join(doc_texts).encode("utf-8")).hexdigest()[:10]
+        cache_file = f"{cache_path}.{digest}.npz"
+
+        try:
+            data = np.load(cache_file)
+            print(f"Loaded embeddings from {cache_file}")
+            return data["embeddings"]
+        except Exception:
+            print("Computing embeddings and caching to disk...")
+            emb = self._embed_texts(doc_texts)
+            np.savez_compressed(cache_file, embeddings=emb)
+            print(f"Saved embeddings to {cache_file}")
+            return emb
+    
+    def call_llm_once(self, prompt: str, max_new_tokens=None):
+        """Call the LLM once with the full prompt and return decoded text.
+        Adapt / replace depending on whether you use HF generate, Qwen SDK, or API calls.
+        """
+        max_new_tokens = max_new_tokens or self.config.get("max_tokens", 256)
+        tokens = self.llm_tokenizer(prompt, return_tensors="pt", truncation=True).to(self.device)
+        with torch.no_grad():
+            # For CUDA and fp16, this reduces memory and speeds decoding
+            if self.device.type == "cuda":
+                with torch.cuda.amp.autocast():
+                    outputs = self.llm.generate(**tokens,
+                                                max_new_tokens=max_new_tokens,
+                                                do_sample=False,
+                                                eos_token_id=self.llm_tokenizer.eos_token_id,
+                                                temperature=self.config.get("generation_temperature", 0.0))
+            else:
+                outputs = self.llm.generate(**tokens,
+                                            max_new_tokens=max_new_tokens,
+                                            do_sample=False,
+                                            eos_token_id=self.llm_tokenizer.eos_token_id,
+                                            temperature=self.config.get("generation_temperature", 0.0))
+        text = self.llm_tokenizer.decode(outputs[0], skip_special_tokens=True)
+        return text
+    
+    def generate_questions_batch(self,
+                             contexts: List[str],
+                             n_questions_per_context: int = 3,
+                             max_tokens_per_question: int = 180) -> List[Dict]:
+        """
+        Generate N questions per context using a single LLM call (or minimal calls).
+        Returns list of parsed JSON objects, one per context.
+        """
+        t0 = time.time()
+        # Build one big prompt that requests JSON output for each context.
+        # Keep the instruction concise and strict to reduce parsing work.
+        instruction = (
+            "You are a helpful question generator. For each context below, generate "
+            f"{n_questions_per_context} high-quality multiple-choice questions. "
+            "Return the output as a JSON list of objects. Each object should be:\n"
+            '{"question": "...", "options": ["A", "B", "C", "D"], "answer_index": 1, "explanation": "...", "difficulty":"easy|medium|hard", "topic":"..."}\n\n'
+            "Make sure JSON is the only content in the response.\n\n"
+        )
+
+        prompt_parts = [instruction]
+        for i, ctx in enumerate(contexts):
+            prompt_parts.append(f"CONTEXT_{i}:\n{ctx}\n\nREQUEST: Generate {n_questions_per_context} MCQs for CONTEXT_{i}.\n")
+
+        full_prompt = "\n".join(prompt_parts)
+
+        # A rough token budget: n_questions * per-question tokens
+        max_new_tokens = min(1024, n_questions_per_context * len(contexts) * max_tokens_per_question)
+        # call LLM once
+        raw = self.call_llm_once(full_prompt, max_new_tokens=max_new_tokens)
+        t1 = self._timeit("LLM single-call generation", t0)
+
+        # Heuristic: parse the JSON from the model's output.
+        # We'll search for the first "{" or "[" and attempt json.loads on that substring.
+        json_start = min((raw.find(c) for c in ['{','['] if any(raw.find(c)!=-1 for c in ['{','['])), default=0)
+        parsed = None
+        try:
+            parsed = json.loads(raw[json_start:])
+        except Exception:
+            # attempt to extract the first JSON block using regex
+            import re
+            m = re.search(r"(\[.*\])", raw, flags=re.S)
+            if m:
+                try:
+                    parsed = json.loads(m.group(1))
+                except Exception as e:
+                    print("JSON parsing failed:", e)
+                    parsed = []
+            else:
+                print("WARNING: Could not find JSON block. Returning raw text.")
+                parsed = [{"raw": raw}]
+
+        # If the model returns a flat list mixing Qs for all contexts, try to split heuristically:
+        if isinstance(parsed, list) and len(parsed) >= len(contexts) * n_questions_per_context:
+            # Optionally group by context if model included context labels; otherwise return flat list.
+            grouped = []
+            idx = 0
+            for i in range(len(contexts)):
+                group = parsed[idx: idx + n_questions_per_context]
+                grouped.append(group)
+                idx += n_questions_per_context
+            t1 = self._timeit("parsing & grouping", t1)
+            return grouped
+        else:
+            t1 = self._timeit("parsing", t1)
+            return [parsed]
 
     def export_mcqs(self, mcqs: List[MCQQuestion], output_path: str):
         """Export MCQs to JSON file"""
