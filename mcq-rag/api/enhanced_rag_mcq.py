@@ -665,7 +665,7 @@ class EnhancedRAGMCQGenerator:
         pl = getattr(self.llm, "pipeline", None)
         if pl is not None:
             try:
-                # Call the pipeline with a list — transformers will return a list of generation outputs. We do not override generation settings here to avoid changing logic.
+                # Call the pipeline with a list. Transformers will return a list of generation outputs.
                 raw_outputs = pl(prompts)
 
                 responses = []
