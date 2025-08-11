@@ -20,7 +20,7 @@ RUN pip install --upgrade pip
 WORKDIR /app
 
 # Copy requirements folder and install dependencies
-COPY requirements.txt
+COPY requirements.txt .
 
 # Download wheels for caching
 RUN pip download --no-cache-dir -r requirements.txt -d ./wheels
