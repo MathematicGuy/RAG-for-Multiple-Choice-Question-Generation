@@ -720,13 +720,13 @@ class EnhancedRAGMCQGenerator:
                 difficulty = difficulties[j % len(difficulties)]
                 question_type = question_types[j % len(question_types)]
 
-                # Use the same query/result selection logic as generate_mcq()
                 query = topic
-                # retrieve context once per prompt (preserve original logic)
+
+                # retrieve context once per prompt
                 contexts = self.retriever.retrieve_diverse_contexts(query, k=self.config.get("k", 5)) if hasattr(self, "retriever") else []
                 context_text = "\n\n".join([d.page_content for d in contexts]) if contexts else topic
 
-                # Build prompt via your PromptTemplateManager (same as original)
+                # Build prompt with PromptTemplateManager
                 prompt_template = self.template_manager.get_template(question_type)
                 prompt_input = {
                     "context": context_text,
@@ -736,10 +736,9 @@ class EnhancedRAGMCQGenerator:
                 }
                 formatted = prompt_template.format(**prompt_input)
 
-                # Length check and fallback (reuse existing check)
+                # Length check and fallback
                 is_safe, token_count = self.check_prompt_length(formatted)
                 if not is_safe:
-                    # replicate the original truncation behaviour
                     truncated = formatted[: self.config.get("max_prompt_chars", 2000)]
                     formatted = truncated
 
