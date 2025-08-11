@@ -459,7 +459,7 @@ class EnhancedRAGMCQGenerator:
 
     def _load_llm(self) -> HuggingFacePipeline:
         """Load and configure the LLM"""
-        token_path = Path("./tokens/hugging_face_token.txt")
+        token_path = Path("./tokens/hf_token.txt")
         if token_path.exists():
             with token_path.open("r") as f:
                 hf_token = f.read().strip()

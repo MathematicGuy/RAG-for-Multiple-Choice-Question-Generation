@@ -7,3 +7,4 @@ __pycache__/
 pdfs/
 generated_mcqs.json
 .env
+DOCKER_NOTE.md
