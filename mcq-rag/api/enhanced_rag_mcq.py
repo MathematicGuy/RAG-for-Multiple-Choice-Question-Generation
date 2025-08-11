@@ -657,6 +657,43 @@ class EnhancedRAGMCQGenerator:
             print(f"Raw response: {response[:500]}...")
             raise ValueError(f"Failed to parse LLM response: {e}")
 
+    def _batch_invoke(self, prompts: List[str]) -> List[str]:
+        if not prompts:
+            return []
+
+        # Try to use transformers pipeline (batch mode)
+        pl = getattr(self.llm, "pipeline", None)
+        if pl is not None:
+            try:
+                # Call the pipeline with a list — transformers will return a list of generation outputs. We do not override generation settings here to avoid changing logic.
+                raw_outputs = pl(prompts)
+
+                responses = []
+                for out in raw_outputs:
+                    # The pipeline may return either a dict (single result) or a list of dicts (if return_full_text or num_return_sequences was set)
+                    if isinstance(out, list) and out:
+                        text = out[0].get("generated_text", "")
+                    elif isinstance(out, dict):
+                        text = out.get("generated_text", "")
+                    else:
+                        # fallback: coerce to string
+                        text = str(out)
+                    responses.append(text)
+
+                if len(responses) == len(prompts):
+                    return responses
+                else:
+                    print("⚠️ Batch pipeline returned unexpected shape — falling back")
+            except Exception as e:
+                # Batch mode failed. Fall back to sequential invocations.
+                print(f"⚠️ Batch invoke failed: {e}. Falling back to sequential.")
+
+        # Sequential invocation to preserve behavior
+        results = []
+        for p in prompts:
+            results.append(self.llm.invoke(p))
+        return results
+
     def generate_batch(self,
                       topics: List[str],
                       question_per_topic: int = 5,
@@ -670,8 +707,9 @@ class EnhancedRAGMCQGenerator:
         if question_types is None:
             question_types = [QuestionType.DEFINITION, QuestionType.APPLICATION]
 
-        mcqs = []
         total_questions = len(topics) * question_per_topic
+        prompt_metadatas = [] # stores tuples (topic, difficulty, question_type)
+        formatted_prompts = []
 
         print(f"🎯 Generating {total_questions} MCQs...")
 
@@ -679,21 +717,78 @@ class EnhancedRAGMCQGenerator:
             print(f"📝 Processing topic {i+1}/{len(topics)}: {topic}")
 
             for j in range(question_per_topic):
-                try:
-                    # Cycle through difficulties and question types
-                    difficulty = difficulties[j % len(difficulties)]
-                    question_type = question_types[j % len(question_types)]
+                difficulty = difficulties[j % len(difficulties)]
+                question_type = question_types[j % len(question_types)]
 
-                    mcq = self.generate_mcq(topic, difficulty, question_type)
-                    mcqs.append(mcq)
+                # Use the same query/result selection logic as generate_mcq()
+                query = topic
+                # retrieve context once per prompt (preserve original logic)
+                contexts = self.retriever.retrieve_diverse_contexts(query, k=self.config.get("k", 5)) if hasattr(self, "retriever") else []
+                context_text = "\n\n".join([d.page_content for d in contexts]) if contexts else topic
 
-                    print(f"  ✅ Generated question {j+1}/{question_per_topic} "
-                          f"(Quality: {mcq.confidence_score:.1f})")
+                # Build prompt via your PromptTemplateManager (same as original)
+                prompt_template = self.template_manager.get_template(question_type)
+                prompt_input = {
+                    "context": context_text,
+                    "topic": topic,
+                    "difficulty": difficulty.value if hasattr(difficulty, 'value') else str(difficulty),
+                    "question_type": question_type.value if hasattr(question_type, 'value') else str(question_type)
+                }
+                formatted = prompt_template.format(**prompt_input)
 
-                except Exception as e:
-                    print(f"  ❌ Failed to generate question {j+1}: {e}")
+                # Length check and fallback (reuse existing check)
+                is_safe, token_count = self.check_prompt_length(formatted)
+                if not is_safe:
+                    # replicate the original truncation behaviour
+                    truncated = formatted[: self.config.get("max_prompt_chars", 2000)]
+                    formatted = truncated
 
-        print(f"🎉 Generated {len(mcqs)}/{total_questions} MCQs successfully")
+                prompt_metadatas.append((topic, difficulty, question_type))
+                formatted_prompts.append(formatted)
+
+        total = len(formatted_prompts)
+        if total == 0:
+            return []
+
+        print(f"📦 Sending {total} prompts to the LLM in batch mode (if supported)")
+        start_t = time.time()
+        raw_responses = self._batch_invoke(formatted_prompts)
+        elapsed = time.time() - start_t
+        print(f"⏱ LLM batch time: {elapsed:.2f}s for {total} prompts")
+
+        # Parse each raw response back into MCQQuestion objects using the
+        # original parsing routine (keeps behaviour identical).
+        mcqs = []
+        for meta, response in zip(prompt_metadatas, raw_responses):
+            topic, difficulty, question_type = meta
+            try:
+                response_data = self._extract_json_from_response(response)
+
+                # reconstruct MCQQuestion using the same fields as original
+                options = []
+                for label, text in response_data["options"].items():
+                    is_correct = label == response_data["correct_answer"]
+                    options.append(self.MCQOption(label=label, text=text, is_correct=is_correct))
+
+                mcq = self.MCQQuestion(
+                    question_id=response_data.get("id", None),
+                    topic=topic,
+                    question_text=response_data["question"],
+                    options=options,
+                    explanation=response_data.get("explanation", ""),
+                    difficulty=(difficulty if hasattr(difficulty, 'name') else difficulty),
+                    question_type=(question_type if hasattr(question_type, 'name') else question_type),
+                    confidence_score=response_data.get("confidence_score", 0.0)
+                )
+                # preserve any validation that used to run in generate_mcq
+                if hasattr(self, 'validator'):
+                    mcq = self.validator.calculate_quality_score(mcq)
+
+                mcqs.append(mcq)
+            except Exception as e:
+                print(f"❌ Failed parsing response for topic={topic}: {e}")
+
+        print(f"🎉 Generated {len(mcqs)}/{total} MCQs successfully (batched)")
         return mcqs
 
     def export_mcqs(self, mcqs: List[MCQQuestion], output_path: str):
