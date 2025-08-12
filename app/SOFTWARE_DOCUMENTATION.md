@@ -86,7 +86,7 @@ Imagine building a house with separate rooms for different purposes:
 ## 📁 Folder Structure Guide
 
 ```
-api-cloud/
+app/
 ├── 📋 Application/           # Application Layer - Workflows & Data Transfer
 ├── 🧠 Domain/               # Domain Layer - Business Rules
 ├── 🔧 Infrastructure/       # Infrastructure Layer - External Systems
@@ -1112,12 +1112,12 @@ Error: ModuleNotFoundError: No module named 'Domain'
 
 **Solution:**
 ```python
-# Make sure you're running from the api-cloud directory
-cd api-cloud
+# Make sure you're running from the app directory
+cd app
 python main.py
 
 # Or add to PYTHONPATH
-export PYTHONPATH=/path/to/api-cloud:$PYTHONPATH
+export PYTHONPATH=/path/to/app:$PYTHONPATH
 ```
 
 #### **2. Dependency Injection Errors**
