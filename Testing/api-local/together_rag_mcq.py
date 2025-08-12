@@ -17,6 +17,7 @@ from dataclasses import dataclass, asdict
 from pathlib import Path
 from enum import Enum
 import numpy as np
+import requests
 
 # LangChain imports
 from langchain_community.document_loaders import PyPDFLoader
@@ -26,7 +27,7 @@ from langchain_huggingface.llms import HuggingFacePipeline
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.runnables import RunnableParallel, RunnablePassthrough
 from langchain_core.prompts import PromptTemplate
-from langchain_community.vectorstores import FAISS
+from langchain_community.vectorstores.faiss import FAISS
 
 from langchain_core.documents import Document
 
@@ -383,7 +384,7 @@ class EnhancedRAGMCQGenerator:
         # Vietnamese typically has ~0.75 tokens per character
         return int(len(text) * 0.75)
 
-	#? Parse Json String
+    #? Parse Json String
     def _extract_json_from_response(self, response: str) -> dict:
         """Extract JSON from LLM response with multiple fallback strategies"""
 
@@ -545,11 +546,123 @@ class EnhancedRAGMCQGenerator:
         print(f"✅ Created vector database with {len(chunks)} chunks")
         return len(chunks)
 
+    def generate_mcq_with_together(self,
+                                together_api_key: str,
+                                topic: str,
+                                model="Qwen/Qwen2.5-7B-Instruct-Turbo",
+                                difficulty: DifficultyLevel = DifficultyLevel.MEDIUM,
+                                question_type: QuestionType = QuestionType.DEFINITION,
+                                context_query: Optional[str] = None) -> MCQQuestion:
+        """
+        Generate MCQs from a PDF using Together AI API.
+
+        Args:
+            pdf_path (str): Path to PDF file.
+            api_key (str): Together AI API key.
+            model (str): Together AI model ID.
+            topic (str): Optional topic override.
+            difficulty (str): easy/medium/hard/expert.
+            question_type (str): definition/application/analysis/comparison/evaluation.
+
+        Returns:
+            List[MCQQuestion]
+        """
+        if not together_api_key:
+            raise ValueError("❌ API key required.")
+
+        if not self.retriever:
+            raise RuntimeError("System not initialized. Call initialize_system() first.")
+
+        if not self.llm:
+            raise RuntimeError("LLM not initialized. Call initialize_system() first.")
+
+        # Use topic as query if no specific context query provided
+        query = context_query or topic
+
+        # Retrieve relevant contexts (reduced number)
+        contexts = self.retriever.retrieve_diverse_contexts(
+            query, k=self.config["retrieval_k"]
+        )
+
+        if not contexts:
+            raise ValueError(f"No relevant context found for topic: {topic}")
+
+        # Format and truncate contexts
+        context_text = "\n\n".join(doc.page_content for doc in contexts)
+        context_text = self._truncate_context(context_text)
+
+        # 2. Build prompt
+        prompt = f"""
+            Hãy tạo 1 câu hỏi trắc nghiệm dựa trên nội dung sau đây.
+            Nội dung: {context_text}
+            Chủ đề: {topic}
+            Mức độ: {difficulty}
+            Loại câu hỏi: {question_type}
+
+            QUAN TRỌNG: Chỉ trả về JSON hợp lệ, không có text bổ sung, luôn trả lời bằng tiếng việt:
+
+            {{
+                "question": "Câu hỏi rõ ràng về {topic}",
+                "options": {{
+                    "A": "Đáp án A",
+                    "B": "Đáp án B",
+                    "C": "Đáp án C",
+                    "D": "Đáp án D"
+                }},
+                "correct_answer": "A",
+                "explanation": "Giải thích tại sao đáp án A đúng",
+                "topic": "{topic}",
+                "difficulty": "{difficulty}",
+                "question_type": "{question_type}"
+            }}
+            """
+
+        headers = {
+            "Authorization": f"Bearer {together_api_key}",
+            "Content-Type": "application/json"
+        }
+
+        payload = {
+            "model": model,
+            "prompt": prompt,
+            "max_tokens": 800,
+            "temperature": 0.7
+        }
+
+        # 3. Call Together AI API
+        response = requests.post("https://api.together.xyz/v1/completions", headers=headers, json=payload)
+        if not response.ok:
+            raise RuntimeError(f"❌ API error {response.status_code}: {response.text}")
+
+        raw_text = response.json()["choices"][0]["text"].strip()
+
+        # 4. Parse JSON
+        # data = self._extract_json_from_response(raw_text)
+
+        # 5. Convert to MCQQuestion
+        # options = []
+        # for label, text in data["options"].items():
+        #     options.append(MCQOption(label, text, label == data["correct_answer"]))
+
+        # mcq = MCQQuestion(
+        #     question=data["question"],
+        #     context=context_text,
+        #     options=options,
+        #     explanation=data["explanation"],
+        #     difficulty=difficulty,
+        #     topic=topic,
+        #     question_type=question_type,
+        #     source=pdf_path
+        # )
+        # mcq.confidence_score = self.validator.calculate_quality_score(mcq)
+
+        return raw_text
+
     def generate_mcq(self,
-                     topic: str,
-                     difficulty: DifficultyLevel = DifficultyLevel.MEDIUM,
-                     question_type: QuestionType = QuestionType.DEFINITION,
-                     context_query: Optional[str] = None) -> MCQQuestion:
+                    topic: str,
+                    difficulty: DifficultyLevel = DifficultyLevel.MEDIUM,
+                    question_type: QuestionType = QuestionType.DEFINITION,
+                    context_query: Optional[str] = None) -> MCQQuestion:
         """Generate a single MCQ with proper length management"""
 
         if not self.retriever:
@@ -658,10 +771,10 @@ class EnhancedRAGMCQGenerator:
             raise ValueError(f"Failed to parse LLM response: {e}")
 
     def generate_batch(self,
-                      topics: List[str],
-                      question_per_topic: int = 5,
-                      difficulties: Optional[List[DifficultyLevel]] = None,
-                      question_types: Optional[List[QuestionType]] = None) -> List[MCQQuestion]:
+                        topics: List[str],
+                        question_per_topic: int = 5,
+                        difficulties: Optional[List[DifficultyLevel]] = None,
+                        question_types: Optional[List[QuestionType]] = None) -> List[MCQQuestion]:
         """Generate batch of MCQs"""
 
         if difficulties is None:
@@ -684,6 +797,8 @@ class EnhancedRAGMCQGenerator:
                     difficulty = difficulties[j % len(difficulties)]
                     question_type = question_types[j % len(question_types)]
 
+                    together_ai_api = 'a4910347ea0b1f86be877cd19899dd0bd3f855487a0b80eb611a64c0abf7a782'
+                    # mcq = self.generate_mcq_with_together(topic, together_api_key=together_ai_api, topic=topic, difficulty=difficulty, question_type=question_type)
                     mcq = self.generate_mcq(topic, difficulty, question_type)
                     mcqs.append(mcq)
 
@@ -781,7 +896,7 @@ def main():
             print(f"📚 System ready with {len(filenames)} files and {num_chunks} chunks")
 
             # Generate sample MCQs
-            topics = ["Object Oriented Programming", "Malware Reverse Engineering"]
+            topics = ["FAISS: IndexFlatIP", "Explainable AI", "Mô hình BERT"]
 
             # Single question generation
             # print("\n🎯 Generating single MCQ...")
