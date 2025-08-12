@@ -1,6 +1,6 @@
 __pycache__
 .vscode
-LangChain/langchain-course
+LangChain
 Testing/*
 !Testing/api-local
 
