@@ -1,5 +1,5 @@
-PWD d:\CMC_UNI\Final Year\Graduation_Project\RAG-for-Multiple-Choice-Question-Generation\RAG\rag_latex
-INPUT d:\CMC_UNI\Final Year\Graduation_Project\RAG-for-Multiple-Choice-Question-Generation\RAG\rag_latex\rag_system.tex
+PWD d:\graduation_project\rag-for-multiple-choice-question-generation\Testing\TestingRAG\rag_latex
+INPUT d:\graduation_project\rag-for-multiple-choice-question-generation\Testing\TestingRAG\rag_latex\rag_system.tex
 OUTPUT rag_system.log
 OUTPUT rag_system.log
 INPUT C:\Users\boboi\AppData\Local\Programs\MiKTeX\tex\latex\latexconfig\lualatexquotejobname.lua
