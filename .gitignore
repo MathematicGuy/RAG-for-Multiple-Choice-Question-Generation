@@ -1,5 +1,5 @@
 __pycache__
 .vscode
-LangChain
+LangChain/
 mcq-rag/tokens/*
 mcq-rag/api/unsloth_compiled_cache

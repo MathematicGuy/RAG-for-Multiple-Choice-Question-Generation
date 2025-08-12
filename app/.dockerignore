@@ -1,9 +1,0 @@
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-*.log
-*.DS_Store
-pdfs/
-generated_mcqs.json
-.env
