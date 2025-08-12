@@ -1,5 +1,6 @@
 __pycache__
 .vscode
 LangChain/
+Testing
 mcq-rag/tokens/*
 mcq-rag/api/unsloth_compiled_cache
