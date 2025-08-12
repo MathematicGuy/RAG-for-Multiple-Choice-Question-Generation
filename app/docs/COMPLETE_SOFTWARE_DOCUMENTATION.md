@@ -446,12 +446,10 @@ curl -X POST "http://localhost:8000/api/v1/documents/upload" \
 **Request Body**:
 ```json
 {
-  "topic": "Machine Learning",
-  "context": "Optional background context...",
-  "question_type": "single_choice",
-  "difficulty": "medium",
-  "num_options": 4,
-  "language": "en"
+  "topic": "Hệ thống phân loại message HAM và SPAM",
+  "context_query": "Hệ thống phân loại message HAM và SPAM",
+  "question_type": "definition",
+  "difficulty": "medium"
 }
 ```
 

@@ -56,7 +56,9 @@ class MCQGenerationService:
         # 1. Retrieve relevant context
         query = context_query or topic
         contexts = await self.vector_store_repository.search_diverse(query, k=3)
+        print("CONTEXTS:", contexts)
 
+        #! Identify Error (Tagging related Files + Use AI Agent to teach me how to Debug)
         if not contexts:
             raise ValueError(f"No relevant context found for topic: {topic}")
 

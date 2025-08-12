@@ -198,7 +198,7 @@ async def health_check():
     services = {
         "llm_service": False,
         "vector_store": False,
-        "document_processor": True  # Always true for now
+        "document_processor": False  
     }
 
     try:
@@ -224,7 +224,7 @@ async def health_check():
     )
 
 
-@app.post("/api/v1/mcq/generate", response_model=MCQResponseDTO)
+@app.post("/api/v1/mcq/gen", response_model=MCQResponseDTO)
 async def generate_mcq(
     request: MCQRequestDTO,
     use_case: GenerateMCQUseCase = Depends(get_generate_mcq_use_case)
@@ -238,7 +238,7 @@ async def generate_mcq(
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
-@app.post("/api/v1/mcq/generate-batch", response_model=BatchMCQResponseDTO)
+@app.post("/api/v1/mcq/gen-batch", response_model=BatchMCQResponseDTO)
 async def generate_batch_mcq(
     request: BatchMCQRequestDTO,
     use_case: BatchGenerateMCQUseCase = Depends(get_batch_generate_mcq_use_case)
