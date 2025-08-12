@@ -1,5 +1,5 @@
 # Fdb version 4
-["lualatex"] 1754973527.63312 "d:/graduation_project/rag-for-multiple-choice-question-generation/Testing/TestingRAG/rag_latex/rag_system.tex" "rag_system.pdf" "rag_system" 1754973534.8439 0
+["lualatex"] 1754975240.68815 "d:/graduation_project/rag-for-multiple-choice-question-generation/Testing/TestingRAG/rag_latex/rag_system.tex" "rag_system.pdf" "rag_system" 1754975246.3809 0
   "C:/Users/boboi/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map" 1754824291 162991 50089d31be931aa11cba9fca414ceb8c ""
   "C:/Users/boboi/AppData/Local/MiKTeX/luatex-cache/generic/fonts/otl/arial.luc" 1750469929 688280 58ff43b52f7c56856152624b97fc6183 ""
   "C:/Users/boboi/AppData/Local/MiKTeX/luatex-cache/generic/fonts/otl/arialbd.luc" 1750469930 683807 5e13b29c05bdbd26a3e0677b2db2c975 ""
@@ -269,12 +269,12 @@
   "C:/WINDOWS/Fonts/times.ttf" 1651900759 1206884 458ef4da231b90ee89ef6d4d85c16633 ""
   "C:/WINDOWS/Fonts/timesbd.ttf" 1651900759 1185876 d34f6a4606c0b4456cc2cc45caf8e123 ""
   "C:/WINDOWS/Fonts/timesi.ttf" 1651900759 977892 4e1c7e34753073b9862671f9d6b5f511 ""
-  "architecture.png" 1754973516 60062 84a11c9392e815fe9141dcc087df924b ""
-  "d:/graduation_project/rag-for-multiple-choice-question-generation/Testing/TestingRAG/rag_latex/rag_system.tex" 1754973516 50856 d8d845c8fddbf55ca0959f793f0d00a1 ""
-  "rag_system.aux" 1754973534 6248 3501513834fe426009207a684b8d0dc4 "lualatex"
-  "rag_system.out" 1754973534 5961 4b9a3835c0b6f0e1f9e58bd1bc5bf8bc "lualatex"
-  "rag_system.tex" 1754973516 50856 d8d845c8fddbf55ca0959f793f0d00a1 ""
-  "rag_system.toc" 1754973534 2549 cb13e53a48221ae65bc8230237b719f5 "lualatex"
+  "architecture.png" 1754975234 60062 84a11c9392e815fe9141dcc087df924b ""
+  "d:/graduation_project/rag-for-multiple-choice-question-generation/Testing/TestingRAG/rag_latex/rag_system.tex" 1754975234 50856 d8d845c8fddbf55ca0959f793f0d00a1 ""
+  "rag_system.aux" 1754975245 6248 3501513834fe426009207a684b8d0dc4 "lualatex"
+  "rag_system.out" 1754975245 5961 4b9a3835c0b6f0e1f9e58bd1bc5bf8bc "lualatex"
+  "rag_system.tex" 1754975234 50856 d8d845c8fddbf55ca0959f793f0d00a1 ""
+  "rag_system.toc" 1754975245 2549 cb13e53a48221ae65bc8230237b719f5 "lualatex"
   (generated)
   "rag_system.aux"
   "rag_system.log"
